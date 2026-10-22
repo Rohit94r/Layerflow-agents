@@ -1,0 +1,44 @@
+{
+  "id": "deep_dive-good-001",
+  "category": "deep_dive",
+  "label": "good",
+  "description": "Company analysis of an industrial-robot maker whose profits come from services on its installed base. Primary filing, earnings-call excerpt and independent analysis. Fictional company and people (Fabrikam Robotics, Lena Fischer, Marco Bianchi, Trey Research); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Fabrikam Robotics makes its money after the robot is installed",
+      "angle": "How a services-led model turns a smaller installed base into higher margins, and where it is exposed",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://investors.fabrikam-robotics.example/annual-report-2026",
+        "title": "Fabrikam Robotics annual report, fiscal year 2026 (excerpt)",
+        "publisher": "Fabrikam Robotics (annual report)",
+        "published_at": "2026-09-05",
+        "text": "Revenue for fiscal year 2026 was $3.4bn, up 8% from $3.15bn in fiscal 2025. Services, which include maintenance contracts, software subscriptions and spare parts, contributed 46% of revenue, compared with 39% three years earlier. Gross margin was 58% on services and 31% on hardware. Our installed base reached approximately 61,000 robots at the end of the year. Research and development expense was $410m. Our largest customer, an automotive manufacturer, accounted for 14% of revenue. Net debt at year end was $1.1bn. During the year we completed three acquisitions of software companies specialising in predictive maintenance for a combined consideration of $260m. Approximately 72% of robots sold in fiscal 2026 were sold together with a multi-year service contract."
+      },
+      {
+        "url": "https://investors.fabrikam-robotics.example/events/q4-fy2026-call-transcript",
+        "title": "Fabrikam Robotics Q4 FY2026 earnings call transcript (excerpt)",
+        "publisher": "Fabrikam Robotics (earnings call transcript)",
+        "published_at": "2026-09-05",
+        "text": "LENA FISCHER, CHIEF EXECUTIVE: Our strategy is simple. We price the robot to win the installation, and we price the service to earn the return. A customer who signs a five-year service contract renews at a rate above 90%. ANALYST: Is that pricing sustainable as rivals add software? FISCHER: The software is only valuable with the data from the installed base, and our installed base is the data. MARCO BIANCHI, CHIEF FINANCIAL OFFICER: For fiscal 2027 we expect revenue growth in the mid-single digits, with services growing faster than hardware. We are not providing margin guidance. ANALYST: How exposed are you to the automotive cycle? BIANCHI: Automotive customers were 38% of revenue this year. We are working to bring that down but it will take time."
+      },
+      {
+        "url": "https://www.treyresearch.example/insights/robotics-services-economics",
+        "title": "Robotics makers: the services gap",
+        "publisher": "Trey Research",
+        "published_at": "2026-09-20",
+        "text": "Fabrikam Robotics sold fewer robots last year than any of its three largest competitors, according to Trey Research's estimates of industry shipments, yet reported the highest gross margin in the group. The difference lies in services: Fabrikam's competitors generate between 20% and 30% of revenue from services, according to their public filings. Trey Research analyst Priyanka Shah argues that Fabrikam's advantage rests on switching costs, because customers who integrate its maintenance software into their production planning find it costly to change. Shah identifies three risks: dependence on the automotive sector, pressure from customers who want to service robots themselves, and the possibility that rivals bundle free software with hardware to break Fabrikam's pricing."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 3,
+    "required_sections": ["snapshot", "business_model", "how_it_makes_money", "strategic_moves", "the_numbers", "moat", "risks", "lessons"],
+    "allowed_numbers": ["2026", "3.4", "8", "3.15", "2025", "46", "39", "58", "31", "61,000", "410", "14", "1.1", "260", "72", "5", "90", "2027", "38", "20", "30"],
+    "must_not_contain": ["market capitalisation", "market capitalization", "price-to-earnings"],
+    "traps": ["computed_ratio_not_in_source", "guidance_as_result"]
+  }
+}

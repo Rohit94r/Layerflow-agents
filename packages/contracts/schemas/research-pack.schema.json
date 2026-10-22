@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://layerflow.local/contracts/research-pack.schema.json",
+  "title": "Evidence pack (plan §12.4)",
+  "type": "object",
+  "required": ["summary", "key_facts", "sources", "coverage", "status"],
+  "properties": {
+    "summary": { "type": "string" },
+    "key_facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "claim", "source_url", "confidence"],
+        "properties": {
+          "id": { "type": "integer" },
+          "claim": { "type": "string" },
+          "source_index": { "type": "integer" },
+          "source_url": { "type": "string" },
+          "source_name": { "type": ["string", "null"] },
+          "published_at": { "type": ["string", "null"] },
+          "confidence": { "enum": ["high", "medium", "low", "needs_verification"] }
+        }
+      }
+    },
+    "numbers": {
+      "type": "array",
+      "items": { "type": "object", "required": ["value", "context", "source_url"], "properties": { "value": { "type": "string" }, "unit": { "type": "string" }, "context": { "type": "string" }, "source_url": { "type": "string" }, "verified": { "type": "boolean" } } }
+    },
+    "context": { "type": "string" },
+    "counterpoints": { "type": "array", "items": { "type": "string" } },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "sources": {
+      "type": "array",
+      "items": { "type": "object", "required": ["index", "url"], "properties": { "index": { "type": "integer" }, "url": { "type": "string" }, "title": { "type": ["string", "null"] }, "publisher": { "type": ["string", "null"] }, "fetched_at": { "type": ["string", "null"] }, "injection_flags": { "type": "array" } } }
+    },
+    "coverage": { "type": "object", "required": ["source_count"], "properties": { "source_count": { "type": "integer" }, "independent_publishers": { "type": "integer" }, "has_primary_source": { "type": "boolean" } } },
+    "status": { "enum": ["ok", "insufficient_evidence"] }
+  }
+}

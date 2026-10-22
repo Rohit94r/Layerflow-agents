@@ -1,0 +1,47 @@
+# Competitor set for the SEO workspace (plan §13.1 "Competitor on-page scan").
+#
+# The crawler is rate-limited (1 req/s/domain), honours robots.txt and reads
+# only public pages. It extracts titles, headings, word counts and topic terms
+# to build a "they cover X, you don't" gap list. No rank tracking, no backlinks.
+#
+# sitemap: null → the crawler reads `Sitemap:` lines from robots.txt and falls
+# back to <site>/sitemap.xml. Set an explicit URL only once it is confirmed.
+# max_pages caps pages parsed per refresh (newest first where lastmod exists).
+
+version: 1
+competitors:
+  - key: hbr
+    name: Harvard Business Review
+    site: https://hbr.org
+    sitemap: null
+    max_pages: 40
+
+  - key: mit_smr
+    name: MIT Sloan Management Review
+    site: https://sloanreview.mit.edu
+    sitemap: null
+    max_pages: 40
+
+  - key: mckinsey
+    name: McKinsey Insights
+    site: https://www.mckinsey.com
+    sitemap: null
+    max_pages: 40
+
+  - key: fortune
+    name: Fortune
+    site: https://fortune.com
+    sitemap: null
+    max_pages: 40
+
+  - key: strategy_business
+    name: strategy+business
+    site: https://www.strategy-business.com
+    sitemap: null
+    max_pages: 30
+
+  - key: fast_company
+    name: Fast Company
+    site: https://www.fastcompany.com
+    sitemap: null
+    max_pages: 30

@@ -1,0 +1,44 @@
+{
+  "id": "playbook-good-001",
+  "category": "playbook",
+  "label": "good",
+  "description": "Framework for repricing an installed customer base, grounded in a practitioner case and research. Fictional companies and people (Proseware, Margaret Liu, Trey Research); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "How to reprice an installed base without losing your best customers",
+      "angle": "A step-by-step method built around owning the conversation with the accounts most likely to push back",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://www.saasoperator.example/interviews/proseware-repricing",
+        "title": "How Proseware repriced 1,800 accounts",
+        "publisher": "SaaS Operator",
+        "published_at": "2026-09-08",
+        "text": "Proseware, which sells scheduling software to clinics, raised prices for its 1,800 existing accounts in early 2026, the first increase in four years. Margaret Liu, head of revenue, said the company began by ranking accounts by revenue and by usage, then assigned the 200 largest accounts to named executives who called each customer before any notice was sent. “The first 20 conversations taught us more than six months of pricing research,” Liu said. Proseware gave customers 90 days' notice and offered a two-year price lock to those who renewed early. Average revenue per account rose 11% over the following two quarters, while the renewal rate fell by 1.5 percentage points, from 92% to 90.5%. Liu said the biggest mistake was sending the same email to small and large customers in the first wave, which generated a spike in support tickets."
+      },
+      {
+        "url": "https://www.treyresearch.example/insights/price-change-communication",
+        "title": "Price changes: why the message matters as much as the number",
+        "publisher": "Trey Research",
+        "published_at": "2026-05-15",
+        "text": "Trey Research examined 75 subscription-software companies that raised prices for existing customers between 2023 and 2025. Companies that explained the increase in terms of specific product improvements lost fewer customers than those that cited inflation or costs. Churn in the six months after the increase averaged 2.4 percentage points among companies that gave less than 30 days' notice, compared with 1.1 points among those giving 60 days or more. The researchers recommend segmenting customers by usage before setting the increase, because heavy users are usually the least price-sensitive and light users the most. They caution that results vary widely by market, and that companies with strong competitors offering free tiers saw much higher losses."
+      },
+      {
+        "url": "https://www.cfoquarterly.example/essays/pricing-ownership",
+        "title": "Who owns a price increase?",
+        "publisher": "CFO Quarterly",
+        "published_at": "2026-04-03",
+        "text": "Price increases fail most often because no single person owns them, argues this essay. Finance sets the number, marketing writes the email, sales handles the complaints, and customer success deals with the churn. The author recommends a single owner with authority over all four, a fixed timetable, and an agreed threshold for stopping or slowing the rollout. The piece also warns against repricing during a product outage or a major release, when customers are already frustrated, and notes that repricing is a poor fit for companies whose product is easily replaced by a free alternative."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["problem", "framework", "steps", "worked_example", "failure_modes", "when_not_to_use"],
+    "allowed_numbers": ["1,800", "2026", "200", "20", "90", "11", "1.5", "92", "90.5", "75", "2023", "2025", "2.4", "30", "1.1", "60"],
+    "must_not_contain": ["guaranteed", "always works"],
+    "traps": ["framework_as_universal"]
+  }
+}

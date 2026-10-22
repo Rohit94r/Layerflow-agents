@@ -1,0 +1,44 @@
+{
+  "id": "brief-good-002",
+  "category": "brief",
+  "label": "good",
+  "description": "Series B funding round for an Indian compliance-software startup, with one valuation figure attributed only to unnamed sources. Fictional companies and people (Litware, Alpine Ventures, Coho Capital); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Litware raises $48m Series B to expand bank-compliance software",
+      "angle": "What a compliance-software round says about how Indian banks are buying technology",
+      "region": "india"
+    },
+    "sources": [
+      {
+        "url": "https://www.startupwire.example/funding/litware-series-b",
+        "title": "Litware raises $48m in Series B led by Alpine Ventures",
+        "publisher": "StartupWire India",
+        "published_at": "2026-10-16",
+        "text": "Bengaluru-based Litware, which sells software that automates regulatory reporting for banks, has raised $48m in a Series B round led by Alpine Ventures, with participation from existing investor Coho Capital. The company said the money would be used to expand into Southeast Asia and to double its engineering team. Litware counts 120 banks and non-bank lenders as customers, up from 45 two years ago. Its annual recurring revenue tripled to $14m in the financial year ended March 2026, co-founder and chief executive Ananya Iyer said. The round values the company at about $310m, according to two people familiar with the matter, who asked not to be named because the terms are private. Litware declined to comment on the valuation. “Banks are no longer asking whether to automate compliance, they are asking how fast,” Iyer said."
+      },
+      {
+        "url": "https://www.litware.example/blog/series-b",
+        "title": "Our Series B, and what comes next",
+        "publisher": "Litware (company blog)",
+        "published_at": "2026-10-16",
+        "text": "Today we are announcing a $48m Series B led by Alpine Ventures, with Coho Capital investing again. When we started Litware in 2021, a mid-sized bank needed a team of 30 people working for six weeks to produce a single quarterly regulatory return. Our customers now do the same work with a team of eight in under ten days. We serve 120 regulated lenders today. With this funding we will open an office in Singapore in the first half of 2027 and grow our team from 220 people to around 350 by the end of 2027. We will also invest in tools that let compliance officers trace every reported figure back to the transaction that produced it, because auditability is what our customers value most."
+      },
+      {
+        "url": "https://www.indiabusinesspost.example/banking/regtech-spending",
+        "title": "Lenders step up spending on regulatory technology",
+        "publisher": "India Business Post",
+        "published_at": "2026-10-17",
+        "text": "Indian lenders are spending more on software to meet reporting rules after the central bank tightened deadlines for several returns this year. Litware's $48m round is the largest for a regulatory-technology company in India this year, according to data compiled by the newspaper. Bankers say the main driver is cost: compliance teams have grown faster than revenue at many mid-sized lenders. “The return on these tools is measured in headcount you don't have to hire,” said Rohan Mehta, chief risk officer at a mid-sized private bank, who said his bank was evaluating several vendors. Some analysts caution that the market is crowded, with more than a dozen vendors chasing the same customers, and that larger core-banking providers are adding similar features to their own products."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["lede", "what_happened", "the_numbers", "why_it_matters", "what_to_watch"],
+    "allowed_numbers": ["48", "120", "45", "14", "2026", "310", "2021", "30", "8", "10", "2027", "220", "350"],
+    "must_not_contain": ["valued at $310m by the company", "unicorn"],
+    "traps": ["low_confidence_valuation"]
+  }
+}

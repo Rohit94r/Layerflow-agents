@@ -1,0 +1,44 @@
+{
+  "id": "edge-non-english-001",
+  "category": "brief",
+  "label": "edge",
+  "description": "Mixed-language sources: two English reports plus one Spanish-language report containing an extra job-cuts figure that appears nowhere in English. The language check should drop the Spanish source, and the article must not use its figure. Fictional company and people (Tailspin Toys, Carlos Mendes); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Tailspin Toys moves a quarter of North American production to Mexico",
+      "angle": "Nearshoring in consumer goods: cost, speed and what it means for Asian suppliers",
+      "region": "latam"
+    },
+    "sources": [
+      {
+        "url": "https://www.manufacturingtoday.example/supply-chain/tailspin-nearshoring-update",
+        "title": "Tailspin Toys shifts production to Mexico ahead of schedule",
+        "publisher": "Manufacturing Today",
+        "published_at": "2026-10-14",
+        "text": "Tailspin Toys said it had moved a quarter of the production for its North American market from Asia to two factories in Mexico, three months ahead of the schedule it set when it bought the plants in August. Chief executive Carlos Mendes said shipping times to US distribution centres had fallen from about 35 days to six. The company said unit production costs at the Mexican plants were 7% higher than in Asia, but that lower freight and inventory costs more than offset the difference. Tailspin did not say whether it would close any of its Asian supplier contracts."
+      },
+      {
+        "url": "https://www.retailinsider.example/suppliers/tailspin-mexico-retailers",
+        "title": "Retailers welcome faster restocking as Tailspin shifts output",
+        "publisher": "Retail Insider",
+        "published_at": "2026-10-15",
+        "text": "Toy retailers said Tailspin Toys' move to produce more in Mexico should allow faster restocking of popular lines during the holiday season. A buyer at a large US retail chain, who asked not to be named, said lead times on reorders had already shortened. Tailspin's shift reflects a wider trend among consumer-goods makers seeking to reduce exposure to long shipping routes, though industry groups note that Mexican factory capacity is tightening and wages there have been rising. Tailspin said it would review the remaining split of production in 2027."
+      },
+      {
+        "url": "https://www.diarioeconomico.example/empresas/tailspin-recortes-asia",
+        "title": "Tailspin Toys recortará 4.500 empleos en proveedores asiáticos",
+        "publisher": "Diario Económico",
+        "published_at": "2026-10-15",
+        "text": "Tailspin Toys prevé que el traslado de producción a México supondrá la pérdida de unos 4.500 empleos en sus proveedores asiáticos durante los próximos dos años, según una fuente cercana a la empresa. La compañía no ha confirmado la cifra. El consejero delegado, Carlos Mendes, afirmó que los tiempos de envío a los centros de distribución en Estados Unidos se han reducido de forma significativa."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["lede", "what_happened", "the_numbers", "why_it_matters", "what_to_watch"],
+    "allowed_numbers": ["35", "6", "7", "2027"],
+    "must_not_contain": ["4,500", "4.500", "4500"],
+    "traps": ["non_english_source"]
+  }
+}

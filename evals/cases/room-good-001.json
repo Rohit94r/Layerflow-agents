@@ -1,0 +1,37 @@
+{
+  "id": "room-good-001",
+  "category": "room",
+  "label": "good",
+  "description": "Decision-room narrative built from a supplied interview transcript about a bank's branch-closure pace, plus a news report for context. Fictional bank and people (Contoso Bank, Priya Raman, Tom Becker); no real-world facts. Tests that quotes are used verbatim and no scenes are invented.",
+  "input": {
+    "topic": {
+      "title": "Inside Contoso Bank's decision to close branches slower than planned",
+      "angle": "How an executive committee agreed in advance on the signal that would change its mind",
+      "region": "uk"
+    },
+    "sources": [
+      {
+        "url": "https://ten.example/supplied/contoso-raman-interview-transcript",
+        "title": "Interview transcript: Priya Raman, chief operating officer, Contoso Bank",
+        "publisher": "TEN interview (supplied transcript)",
+        "published_at": "2026-10-10",
+        "text": "TEN: When did the branch question come to the executive committee? RAMAN: March 2025. The board had approved a plan to close 140 of our 420 branches, and the only question left for us was pace. Finance wanted it done in 18 months. TEN: And you didn't. RAMAN: I wanted it slower than anyone in that room thought. My view was that we didn't know which customers would follow us to the app and which would follow a competitor to their branch. TEN: Who disagreed? RAMAN: Tom Becker, our CFO, made the strongest case. He said, and I remember it exactly, “Every month we wait costs us a branch's worth of rent and we learn nothing we can't learn faster.” He wasn't wrong about the cost. TEN: What settled it? RAMAN: We agreed on a number before we started. If more than 15% of customers at a closed branch moved their main account elsewhere within six months, we would stop and redesign. If it was under 8%, we'd go faster. We wrote that down and the board signed it. TEN: What happened? RAMAN: The first 30 closures came in at about 6%. So we went faster. But we only had the right to go faster because we'd agreed to slow down if the number was bad. TEN: What would you tell another COO? RAMAN: Decide what would change your mind before anyone has a stake in being right."
+      },
+      {
+        "url": "https://www.financialreview.example/banking/contoso-branch-programme",
+        "title": "Contoso Bank accelerates branch programme after early results",
+        "publisher": "The Financial Review",
+        "published_at": "2026-09-22",
+        "text": "Contoso Bank has accelerated the closure of its branch network after customer losses at the first sites to close were lower than expected, the bank said in its half-year results. The bank plans to close 140 of its 420 branches by the end of 2027, a programme first announced in early 2025. It has closed 64 so far. The bank said that about 6% of customers at the first 30 closed branches moved their main current account to another provider within six months, below the threshold it had set internally. Consumer groups have criticised the closures, saying older customers in rural areas have been left without access to cash. Contoso said it had installed shared banking hubs in 12 towns that lost their last branch."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["setting", "the_decision", "the_debate", "turning_point", "what_it_reveals"],
+    "allowed_numbers": ["2025", "140", "420", "18", "15", "8", "30", "6", "2027", "64", "12"],
+    "must_not_contain": ["slammed his fist", "the room fell silent", "she paused"],
+    "traps": ["invented_scene", "quote_must_be_verbatim"]
+  }
+}

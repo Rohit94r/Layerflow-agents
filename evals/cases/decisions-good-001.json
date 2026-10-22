@@ -1,0 +1,44 @@
+{
+  "id": "decisions-good-001",
+  "category": "decisions",
+  "label": "good",
+  "description": "Build-versus-buy decision for bank fraud detection, with one bank on each path and an analyst view. Fictional banks and people (Contoso Bank, Woodgrove Bank, Hannah Cole, Trey Research); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Should a mid-sized bank build or buy its fraud-detection models?",
+      "angle": "Two banks, two answers: what actually decides between control and time to value",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://www.financialreview.example/banking/contoso-fraud-models-in-house",
+        "title": "Contoso Bank brings fraud detection in-house after six years with vendor",
+        "publisher": "The Financial Review",
+        "published_at": "2026-09-29",
+        "text": "Contoso Bank has replaced the fraud-detection system it bought from a vendor with models built by its own data-science team, ending a six-year contract. The bank said fraud losses fell from 0.21% of card transaction value to 0.14% in the twelve months after the switch. The in-house team has 35 data scientists and engineers, and the project cost $22m over two years, according to the bank's annual report. Chief risk officer Hannah Cole said control over the models was the main reason. “When fraud patterns change, we can retrain in days instead of waiting for a vendor's quarterly release,” Cole said. She acknowledged that the bank had struggled to hire and that two senior team members had left for technology companies during the project."
+      },
+      {
+        "url": "https://www.bankingtech.example/news/woodgrove-renews-fraud-vendor",
+        "title": "Woodgrove Bank renews fraud contract, citing talent costs",
+        "publisher": "Banking Technology News",
+        "published_at": "2026-10-06",
+        "text": "Woodgrove Bank has signed a five-year renewal with its fraud-detection vendor, choosing not to build its own models. The bank pays about $6m a year under the contract, according to a person familiar with the agreement. Woodgrove's fraud losses were 0.12% of card transaction value last year, below the industry median of 0.17% cited in a recent industry survey. A Woodgrove spokesperson said the bank preferred to put its scarce data-science staff on credit decisions and customer analytics. “We'd rather rent the best fraud model than build the tenth-best,” the spokesperson said. The new contract includes the right to receive model updates monthly rather than quarterly."
+      },
+      {
+        "url": "https://www.treyresearch.example/insights/build-vs-buy-risk-models",
+        "title": "Build or buy? Risk models in mid-sized banks",
+        "publisher": "Trey Research",
+        "published_at": "2026-07-21",
+        "text": "Trey Research interviewed risk executives at 28 mid-sized banks about fraud and credit models. Banks that built in-house typically needed 18 to 30 months before the new models outperformed the vendor systems they replaced. The executives said the main advantages of building were speed of retraining and ownership of data; the main disadvantages were hiring difficulty and key-person risk. Banks that bought cited faster deployment and access to patterns from a vendor's wider client base. The report notes that switching from a vendor back to in-house, or the reverse, typically takes more than a year, so the cost of reversing the decision should be weighed alongside the cost of making it."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["the_question", "option_a", "option_b", "decision_criteria", "risks", "who_fits"],
+    "allowed_numbers": ["0.21", "0.14", "35", "22", "6", "5", "0.12", "0.17", "28", "18", "30"],
+    "must_not_contain": ["building is always better", "buying is always better"],
+    "traps": ["one_sided_treatment"]
+  }
+}

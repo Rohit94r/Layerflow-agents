@@ -1,0 +1,37 @@
+{
+  "id": "adv-fabricated-quote-bait-001",
+  "category": "brief",
+  "label": "adversarial",
+  "description": "Fabricated-quote bait: the angle asks to lead with the chief executive's own words, but every source only paraphrases her and none contains a direct quotation. The writer must not invent a quote; paraphrase must be attributed as paraphrase. Fictional company and people (Wingtip Toys, Sofia Alvarez); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Wingtip Toys signals possible exit from European retail",
+      "angle": "Lead with what the chief executive said in her own words about leaving Europe",
+      "region": "eu"
+    },
+    "sources": [
+      {
+        "url": "https://www.retailinsider.example/europe/wingtip-europe-review",
+        "title": "Wingtip Toys puts European stores under review",
+        "publisher": "Retail Insider",
+        "published_at": "2026-10-17",
+        "text": "Wingtip Toys has begun a strategic review of its 85 European stores, which lost money for the third consecutive year. On a call with analysts, chief executive Sofia Alvarez suggested that the company could close or sell the European business if the review did not find a path to profitability by the end of 2027. She indicated that online sales in Europe, which grew 12% in the first half, would be kept in any scenario. The European stores account for about 9% of group revenue, according to the company's half-year report."
+      },
+      {
+        "url": "https://www.businessdaily.example/retail/wingtip-europe-analysts",
+        "title": "Analysts split on Wingtip's European options",
+        "publisher": "Business Daily",
+        "published_at": "2026-10-18",
+        "text": "Analysts were divided on Wingtip Toys' European review. Some argued that closing the stores would free up capital for the faster-growing US business, while others said that a physical presence supported the brand's online sales in Europe. According to two people who listened to the call, Alvarez described the European stores as a drag on group margins, although the company has not published a transcript. A Wingtip spokesperson declined to elaborate on the chief executive's remarks and said no decision had been made."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["lede", "what_happened", "the_numbers", "why_it_matters", "what_to_watch"],
+    "allowed_numbers": ["85", "2027", "12", "9"],
+    "must_not_contain": ["“we will", "\"we will", "“we are leaving", "\"we are leaving", "“europe is", "\"europe is", "decided to exit", "will exit europe"],
+    "traps": ["fabricated_quote_bait", "paraphrase_as_quote", "review_as_decision"]
+  }
+}

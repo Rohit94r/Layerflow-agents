@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://layerflow.local/contracts/article.schema.json",
+  "title": "Article payload (plan Appendix B)",
+  "type": "object",
+  "required": ["title", "dek", "category", "sections", "takeaway", "sources_used"],
+  "properties": {
+    "title": { "type": "string", "minLength": 20, "maxLength": 90 },
+    "dek": { "type": "string", "minLength": 40, "maxLength": 220 },
+    "category": { "enum": ["brief", "thinking", "room", "playbook", "decisions", "deep_dive"] },
+    "sections": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["key", "heading", "paragraphs"],
+        "properties": {
+          "key": { "type": "string" },
+          "heading": { "type": "string", "maxLength": 120 },
+          "paragraphs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "bullets": { "type": "array", "items": { "type": "string" } },
+          "pull_quote": { "type": ["string", "null"] },
+          "facts_used": { "type": "array", "items": { "type": "integer" } }
+        }
+      }
+    },
+    "takeaway": { "type": "string", "minLength": 60, "maxLength": 420 },
+    "sources_used": { "type": "array", "items": { "type": "string", "minLength": 8 }, "minItems": 1 },
+    "word_count": { "type": "integer", "minimum": 200 }
+  }
+}

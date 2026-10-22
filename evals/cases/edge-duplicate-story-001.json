@@ -1,0 +1,37 @@
+{
+  "id": "edge-duplicate-story-001",
+  "category": "brief",
+  "label": "edge",
+  "description": "Duplicate story: two outlets republish the same wire copy almost verbatim, so there is only one independent source. Dedupe should collapse them and research should count one independent publisher, returning insufficient evidence. Fictional company (Alpine Ski House); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Alpine Ski House to open 14 new resorts by 2029",
+      "angle": "Capacity expansion in leisure: demand signal or overbuild?",
+      "region": "eu"
+    },
+    "sources": [
+      {
+        "url": "https://www.leisurenewsnetwork.example/wire/alpine-ski-house-expansion",
+        "title": "Alpine Ski House plans 14 new resorts by 2029",
+        "publisher": "Leisure News Network (wire)",
+        "published_at": "2026-10-18",
+        "text": "Alpine Ski House plans to open 14 new resorts in Europe by 2029, the company said on Friday, as it bets on continued demand for mountain holidays. The expansion will cost about EUR 900m and add roughly 5,000 rooms, the company said in a statement. Chief executive Ingrid Solberg said bookings for the coming winter season were 9% higher than a year earlier. The company did not say how the expansion would be financed."
+      },
+      {
+        "url": "https://www.dailytravelwire.example/news/alpine-ski-house-14-resorts",
+        "title": "Alpine Ski House to open 14 resorts in Europe by 2029",
+        "publisher": "Daily Travel Wire",
+        "published_at": "2026-10-18",
+        "text": "Alpine Ski House plans to open 14 new resorts in Europe by 2029, the company said on Friday, as it bets on continued demand for mountain holidays. The expansion will cost about EUR 900m and add roughly 5,000 rooms, the company said in a statement. Chief executive Ingrid Solberg said bookings for the coming winter season were 9% higher than a year earlier. The company did not say how the expansion would be financed. (Reporting by Leisure News Network)"
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "insufficient_evidence",
+    "min_sources": 2,
+    "required_sections": ["lede", "what_happened", "the_numbers", "why_it_matters", "what_to_watch"],
+    "allowed_numbers": ["14", "2029", "900", "5,000", "9"],
+    "must_not_contain": ["financed by", "debt-funded"],
+    "traps": ["syndicated_duplicate", "single_independent_publisher"]
+  }
+}

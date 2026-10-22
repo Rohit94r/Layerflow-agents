@@ -1,0 +1,44 @@
+{
+  "id": "deep_dive-good-002",
+  "category": "deep_dive",
+  "label": "good",
+  "description": "Company analysis of an online travel agency shifting from paid search to direct bookings and loyalty. Annual report, investor-day summary and independent reporting. Fictional company and people (Margie's Travel, Aisha Rahman, Business Daily); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Margie's Travel is trying to stop renting its customers",
+      "angle": "The economics of moving from paid acquisition to direct relationships, and what it costs on the way",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://investors.margiestravel.example/annual-report-2026",
+        "title": "Margie's Travel annual report 2026 (excerpt)",
+        "publisher": "Margie's Travel (annual report)",
+        "published_at": "2026-03-12",
+        "text": "Gross bookings for 2025 were $13.4bn and revenue was $1.9bn, giving a take rate of 14.2%. Marketing expense was 38% of revenue, down from 44% in 2023. Direct bookings, made through our app or by customers arriving without paid advertising, were 52% of room nights, up from 41% in 2023. Our loyalty programme ended the year with 23 million active members. Adjusted operating margin was 17%. We hold cash of $2.2bn and have no net debt. Approximately 61% of revenue was earned in Europe."
+      },
+      {
+        "url": "https://investors.margiestravel.example/events/investor-day-2026-summary",
+        "title": "Investor day 2026: summary of management presentation",
+        "publisher": "Margie's Travel (investor presentation)",
+        "published_at": "2026-06-04",
+        "text": "Chief executive Aisha Rahman set out a target for direct bookings to reach 65% of room nights by 2028. She said the company would continue to reduce the share of revenue spent on marketing, but declined to give a target margin. Management said loyalty members book on average 2.3 times as often as non-members. The company plans to spend $300m over three years on its app and on a programme that lets hotels offer member-only rates. Rahman said: “Every booking we win through an advert is a customer we rent. Every booking we win directly is a customer we own.” Management identified hotel chains' own loyalty programmes as the main competitive threat."
+      },
+      {
+        "url": "https://www.businessdaily.example/travel/margies-loyalty-cost",
+        "title": "Margie's Travel's loyalty push squeezes hotel partners",
+        "publisher": "Business Daily",
+        "published_at": "2026-08-19",
+        "text": "Some independent hotels say Margie's Travel's member-only rates are forcing them to offer deeper discounts to stay visible on the platform. Three hotel owners told Business Daily that their effective commission had risen once member discounts were included. A Margie's spokesperson said participation in the programme was voluntary. The regional competition regulator is reviewing practices in the online travel sector, including rate parity clauses, though it has not named any company. Analysts at two brokerages said the shift to direct bookings was credible but that the target of 65% by 2028 depended on keeping loyalty members active without raising rewards costs."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 3,
+    "required_sections": ["snapshot", "business_model", "how_it_makes_money", "strategic_moves", "the_numbers", "moat", "risks", "lessons"],
+    "allowed_numbers": ["2025", "13.4", "1.9", "14.2", "38", "44", "2023", "52", "41", "23", "17", "2.2", "61", "65", "2028", "2.3", "300", "3", "2026"],
+    "must_not_contain": ["will reach 65%", "has reached 65%"],
+    "traps": ["target_as_result", "computed_ratio_not_in_source"]
+  }
+}

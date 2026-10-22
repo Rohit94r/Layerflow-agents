@@ -1,0 +1,37 @@
+{
+  "id": "edge-huge-numbers-001",
+  "category": "brief",
+  "label": "edge",
+  "description": "Very large figures in mixed notation: Indian lakh/crore formatting, US dollars and Japanese yen. The writer must reproduce each figure exactly as the sources give it and must not convert or combine them. Fictional companies and fund (A. Datum Infrastructure, VanArsdel Heavy Industries, the State Infrastructure Fund); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "State fund commits ₹1,25,000 crore to A. Datum's grid build-out",
+      "angle": "The scale of grid capex and who captures the equipment orders",
+      "region": "india"
+    },
+    "sources": [
+      {
+        "url": "https://www.indiabusinesspost.example/infrastructure/adatum-grid-fund",
+        "title": "State Infrastructure Fund backs A. Datum grid plan with ₹1,25,000 crore",
+        "publisher": "India Business Post",
+        "published_at": "2026-10-09",
+        "text": "The State Infrastructure Fund has committed ₹1,25,000 crore over seven years to A. Datum Infrastructure's plan to build new high-voltage transmission lines, the largest single commitment in the fund's history. A. Datum said the programme would add 18,500 circuit kilometres of lines and 62 substations by 2033. The company said about 40% of the commitment would be spent on equipment, much of it imported. Managing director Kavita Rao said the first tenders would be issued in the first quarter of 2027. “This is a decade of work compressed into seven years,” Rao said."
+      },
+      {
+        "url": "https://www.asiabusinessjournal.example/industrials/vanarsdel-transformer-orders",
+        "title": "VanArsdel eyes Indian grid orders as backlog hits record",
+        "publisher": "Asia Business Journal",
+        "published_at": "2026-10-11",
+        "text": "VanArsdel Heavy Industries, which makes power transformers, said its order backlog had reached a record 1.2 trillion yen at the end of September, and that it expected India to become its second-largest market. The company said it was considering a new factory but had not decided where. A separate report by an industry association estimated that global spending on transmission equipment would reach $15bn a year by 2028. Analysts said lead times for large transformers had stretched to more than three years, which could delay grid projects in several countries."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["lede", "what_happened", "the_numbers", "why_it_matters", "what_to_watch"],
+    "allowed_numbers": ["1,25,000", "7", "18,500", "62", "2033", "40", "2027", "1.2", "15", "2028", "3"],
+    "must_not_contain": ["1.25 trillion rupees", "125,000 crore", "$15 billion", "₹1.25 lakh crore", "$8bn", "$15bn of the commitment"],
+    "traps": ["number_conversion", "indian_numbering", "combining_figures"]
+  }
+}

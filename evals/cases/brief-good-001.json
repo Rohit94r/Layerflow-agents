@@ -1,0 +1,44 @@
+{
+  "id": "brief-good-001",
+  "category": "brief",
+  "label": "good",
+  "description": "Cash acquisition in regional cold-chain logistics with a regulatory condition. Fictional companies and people (Northwind Logistics, Fabrikam Freight, Contoso Bank, Trey Research); no real-world facts. Three independent publishers including the acquirer's own release.",
+  "input": {
+    "topic": {
+      "title": "Northwind Logistics agrees $1.2bn cash deal for Fabrikam Freight",
+      "angle": "Scale in cold chain versus regulatory risk: what the combined market share means for shippers and rivals",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://www.businessdaily.example/companies/northwind-fabrikam-freight-deal",
+        "title": "Northwind to buy Fabrikam Freight for $1.2bn",
+        "publisher": "Business Daily",
+        "published_at": "2026-10-19",
+        "text": "Northwind Logistics said on Monday it had agreed to buy rival Fabrikam Freight for $1.2bn in cash, the largest acquisition in the company's 40-year history. The price values Fabrikam at 9.5 times its earnings before interest, tax, depreciation and amortisation for the last twelve months, according to people familiar with the terms. The combined business would operate about 4,800 refrigerated trucks and hold roughly 34% of the regional cold-chain market, based on figures in Northwind's investor presentation. The deal is expected to close in the second quarter of 2027, subject to approval by the competition authority. Northwind said it would fund the purchase with a $900m bridge loan arranged by Contoso Bank and existing cash. “Cold chain is a scale business, and this deal gives us the scale our customers have been asking for,” chief executive Maria Okafor said on a call with analysts. Northwind expects $85m in annual cost savings by 2028, mainly from combining depots and route planning. Shares in Northwind rose 6% in early trading."
+      },
+      {
+        "url": "https://investors.northwind-logistics.example/press/2026-10-19-fabrikam-freight",
+        "title": "Northwind Logistics to acquire Fabrikam Freight",
+        "publisher": "Northwind Logistics (press release)",
+        "published_at": "2026-10-19",
+        "text": "Northwind Logistics today announced a definitive agreement to acquire Fabrikam Freight for a cash consideration of $1.2bn. The transaction has been unanimously approved by the boards of both companies. The combination brings together complementary depot networks across 11 states and a combined fleet of approximately 4,800 temperature-controlled vehicles. Northwind expects the transaction to generate annual run-rate cost synergies of $85m by the end of 2028 and to be accretive to adjusted earnings per share in the first full year after closing. The acquisition will be financed through a combination of cash on hand and a committed $900m bridge facility. Completion is expected in the second quarter of 2027, subject to customary closing conditions including regulatory clearance. Fabrikam Freight will continue to operate under its own brand for at least 18 months after completion."
+      },
+      {
+        "url": "https://www.freightjournal.example/analysis/cold-chain-consolidation-regulator",
+        "title": "Cold-chain consolidation puts regulator in the spotlight",
+        "publisher": "Regional Freight Journal",
+        "published_at": "2026-10-20",
+        "text": "The proposed tie-up between Northwind Logistics and Fabrikam Freight would create the clear leader in refrigerated road freight, and analysts expect a close look from the competition authority. “The regulator will look hard at a combined share above 30 percent,” said Daniel Reyes, a transport analyst at Trey Research. Reyes noted that the authority opened an in-depth review in two of the last three logistics deals of a similar size. Food producers and pharmaceutical distributors, which depend on temperature-controlled transport, have complained about rising rates over the past year. A spokesperson for a shippers' association said members would submit views during the consultation. If the authority opens a second-phase review, the timetable could slip beyond the second quarter of 2027, Reyes said. Northwind's bridge loan, according to the company's filing, is available for 12 months, with an option to extend by six months."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["lede", "what_happened", "the_numbers", "why_it_matters", "what_to_watch"],
+    "allowed_numbers": ["1.2", "40", "9.5", "4,800", "34", "2027", "900", "85", "2028", "6", "11", "18", "30", "12"],
+    "must_not_contain": ["closed the deal", "completed the acquisition", "$1.5bn"],
+    "traps": ["announced_vs_completed"]
+  }
+}

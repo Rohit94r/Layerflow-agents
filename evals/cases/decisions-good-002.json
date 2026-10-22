@@ -1,0 +1,44 @@
+{
+  "id": "decisions-good-002",
+  "category": "decisions",
+  "label": "good",
+  "description": "Market-entry decision: acquisition versus greenfield plant, with one company on each path and integration research. Fictional companies and people (Tailspin Toys, Wide World Importers, Carlos Mendes, Proseware Institute); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Buy or build: two manufacturers, two routes into a new market",
+      "angle": "Speed of an acquisition versus control of a greenfield plant, and the cost of being wrong either way",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://www.manufacturingtoday.example/deals/tailspin-acquires-mexican-maker",
+        "title": "Tailspin Toys buys Mexican manufacturer to speed up nearshoring",
+        "publisher": "Manufacturing Today",
+        "published_at": "2026-08-11",
+        "text": "Tailspin Toys has acquired a contract manufacturer in Mexico for $210m, giving it two operating factories and about 1,900 employees immediately. Chief executive Carlos Mendes said the deal would let the company shift a quarter of its production for the North American market out of Asia within a year. “Building would have taken us three years we don't have,” Mendes said. Tailspin said it expected to spend a further $30m upgrading equipment at the acquired plants. Analysts noted that the acquired company's largest customer, which accounts for 40% of its revenue, is a competitor of Tailspin, and that contract may not be renewed."
+      },
+      {
+        "url": "https://www.asiabusinessjournal.example/companies/wide-world-vietnam-greenfield",
+        "title": "Wide World Importers opens $75m Vietnam plant after 30-month build",
+        "publisher": "Asia Business Journal",
+        "published_at": "2026-09-17",
+        "text": "Wide World Importers has opened its first wholly owned plant in Vietnam, 30 months after breaking ground, at a cost of $75m. The company chose to build rather than acquire because it wanted to install its own production system and train a workforce from the start, chief operating officer Mei Tanaka said. The plant employs 650 people and will reach full capacity in 2027. “We paid in time to get exactly the factory we wanted,” Tanaka said. The company said the build ran four months late, mainly because of delays in connecting the site to the power grid."
+      },
+      {
+        "url": "https://www.proseware-institute.example/papers/cross-border-integration",
+        "title": "Cross-border acquisitions in manufacturing: integration outcomes",
+        "publisher": "Proseware Institute for Work",
+        "published_at": "2026-02-09",
+        "text": "Researchers reviewed 120 cross-border acquisitions by manufacturing companies between 2015 and 2023. In 41% of cases, the acquirer reported missing its cost-savings target within three years. The most common causes were incompatible production systems, loss of key local managers and customer contracts that ended after the change of ownership. Greenfield investments in the same period took a median of 28 months from approval to first production. The authors argue that acquisitions buy speed but import the target's constraints, while greenfield plants offer control at the price of time and execution risk."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["the_question", "option_a", "option_b", "decision_criteria", "risks", "who_fits"],
+    "allowed_numbers": ["210", "1,900", "30", "40", "75", "650", "2027", "120", "2015", "2023", "41", "28"],
+    "must_not_contain": ["synergies of"],
+    "traps": ["one_sided_treatment"]
+  }
+}

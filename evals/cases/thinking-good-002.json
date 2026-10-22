@@ -1,0 +1,44 @@
+{
+  "id": "thinking-good-002",
+  "category": "thinking",
+  "label": "good",
+  "description": "Leadership essay on the hidden cost of rigid office-attendance mandates for senior talent. Fictional survey publisher, companies and people (Lucerne Publishing, Fourth Coffee, Proseware Institute); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "The attendance mandate's hidden bill is paid in senior talent",
+      "angle": "Office mandates may improve visible collaboration while quietly raising attrition among the managers firms most need",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://www.lucernepublishing.example/research/manager-survey-2026",
+        "title": "Manager survey 2026: where and how leaders want to work",
+        "publisher": "Lucerne Publishing Research",
+        "published_at": "2026-09-12",
+        "text": "Lucerne Publishing surveyed 2,100 managers at companies with more than 1,000 employees in August 2026. Some 38% of senior managers said they would consider leaving their employer if required to work from the office five days a week, compared with 21% of junior staff. Respondents who already worked in the office four or more days rated collaboration with their teams higher than those working mostly remotely, 7.2 versus 6.1 on a ten-point scale. However, the two groups rated their own productivity almost identically. The survey's authors note that self-reported intentions to leave typically overstate actual departures, and that the sample over-represents technology and financial services companies."
+      },
+      {
+        "url": "https://www.businessdaily.example/workplace/fourth-coffee-director-attrition",
+        "title": "Fourth Coffee sees director exits rise after office push",
+        "publisher": "Business Daily",
+        "published_at": "2026-10-03",
+        "text": "Annual attrition among directors at Fourth Coffee rose from 7% to 12% in the year after the coffee chain required corporate staff to work from its offices four days a week, according to figures in the company's sustainability report. The company said the increase was partly explained by a reorganisation of its regional structure during the same period. Chief people officer Sam Whitaker said the mandate had improved the speed of cross-functional decisions. “We made a deliberate trade, and we would make it again,” Whitaker said. Two former directors, who asked not to be named, said the policy had been the deciding factor in their departure, citing commuting time and caring responsibilities."
+      },
+      {
+        "url": "https://www.proseware-institute.example/papers/attendance-and-output",
+        "title": "Attendance policies and measured output: early evidence",
+        "publisher": "Proseware Institute for Work",
+        "published_at": "2026-06-20",
+        "text": "Researchers at the Proseware Institute for Work compared 46 companies that increased mandatory office attendance in 2025 with 46 similar companies that did not. Over the following twelve months, they found no statistically significant difference in revenue per employee between the two groups. Companies that increased mandatory attendance did report faster onboarding of new hires, measured by time to first independent project, which fell by an average of three weeks. The authors describe the results as preliminary and say that effects on innovation and long-term retention may take longer to appear. They recommend that companies track attrition by seniority rather than in aggregate, because departures of experienced managers are costlier and slower to replace."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["provocation", "the_tension", "competing_views", "what_leaders_miss", "practical_implication"],
+    "allowed_numbers": ["2,100", "1,000", "2026", "38", "21", "4", "7.2", "6.1", "7", "12", "46", "2025", "3", "5", "10"],
+    "must_not_contain": ["remote work is always more productive", "mandates destroy productivity"],
+    "traps": ["self_reported_intentions"]
+  }
+}

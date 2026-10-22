@@ -1,0 +1,77 @@
+{
+  "slug": "ten",
+  "name": "The Executive Narrative",
+  "domain": "theexecutivenarrative.com",
+  "timezone": "Asia/Kolkata",
+  "settings": {
+    "brand": {
+      "name": "The Executive Narrative",
+      "short_name": "TEN",
+      "site_url": "https://theexecutivenarrative.com",
+      "logo_url": "https://theexecutivenarrative.com/assets/imgs/template/logo/logo-dark.png",
+      "og_image_url": "https://theexecutivenarrative.com/assets/imgs/template/logo/logo-dark.png",
+      "author_name": "The Executive Narrative Editorial",
+      "author_bio": "Analysis for CEOs, founders and senior operators.",
+      "powered_by": "Powered by LayerFlow"
+    },
+    "spelling": "en-US",
+    "cadence": {
+      "per_day": 2,
+      "slots": ["08:30", "17:30"],
+      "weekdays_only": true,
+      "max_per_category_per_day": 1
+    },
+    "scoring": {
+      "recency": 0.30,
+      "entity": 0.25,
+      "signal": 0.20,
+      "source": 0.15,
+      "novelty": 0.10
+    },
+    "watchlist": {
+      "companies": [
+        "Reliance", "Tata", "Infosys", "TCS", "HDFC", "Adani", "Mahindra", "Wipro", "Bajaj",
+        "Microsoft", "Apple", "Alphabet", "Google", "Amazon", "Meta", "Nvidia", "OpenAI", "Anthropic",
+        "Tesla", "Toyota", "Samsung", "TSMC", "Berkshire Hathaway", "JPMorgan", "Goldman Sachs",
+        "BlackRock", "SoftBank", "Walmart", "Unilever", "Nestle", "Aramco", "LVMH"
+      ],
+      "people": [],
+      "sectors": [
+        "artificial intelligence", "semiconductors", "banking", "private equity", "venture capital",
+        "energy transition", "manufacturing", "retail", "telecom", "pharmaceuticals", "logistics", "fintech"
+      ],
+      "regions": ["india", "us", "global"]
+    },
+    "avoid": {
+      "companies": [],
+      "topics": ["celebrity", "horoscope", "sports score"]
+    },
+    "discovery": {
+      "lookback_hours": 24,
+      "max_items": 300,
+      "llm_enrich": true,
+      "enrich_top_k": 12,
+      "auto_disable_after_failures": 5
+    },
+    "research": {
+      "max_fetches": 6,
+      "min_sources": 2,
+      "max_facts": 12
+    },
+    "quality": {
+      "max_revisions": 2,
+      "duplication_max": 0.08,
+      "flesch_min": 45,
+      "flesch_max": 65,
+      "avg_sentence_max": 24
+    },
+    "publishing": {
+      "default_target": "export"
+    },
+    "social": {
+      "emoji": false,
+      "link_in_post": true,
+      "author_type": "organization"
+    }
+  }
+}

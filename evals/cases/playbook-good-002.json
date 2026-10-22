@@ -1,0 +1,44 @@
+{
+  "id": "playbook-good-002",
+  "category": "playbook",
+  "label": "good",
+  "description": "Pre-mortem method for large capital projects, with research evidence and a company case. Fictional companies and people (Coho Winery, Daniel Park, Trey Research, Northwind Logistics); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Run a pre-mortem before you approve the next big capital project",
+      "angle": "A repeatable method to surface project-killing risks before money is committed",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://www.treyresearch.example/insights/capital-projects-pre-mortem",
+        "title": "Capital projects: what predicts cost overruns",
+        "publisher": "Trey Research",
+        "published_at": "2026-03-19",
+        "text": "In a study of 160 capital projects worth more than $20m each, completed between 2019 and 2025, Trey Research found that projects whose approval process included a structured pre-mortem had 22% fewer cost overruns than those that did not. In a pre-mortem, the project team imagines that the project has failed two years from now and writes down the reasons. The study found that the benefit was largest when people outside the project team took part and when risks were assigned to a named owner with a deadline. The researchers caution that teams that adopted pre-mortems may also have had stronger project governance in general."
+      },
+      {
+        "url": "https://www.beveragebusiness.example/operations/coho-bottling-plant",
+        "title": "Coho Winery's $40m bottling plant came in on budget. Here's why",
+        "publisher": "Beverage Business",
+        "published_at": "2026-08-27",
+        "text": "When Coho Winery approved a $40m bottling plant in 2024, chief operating officer Daniel Park asked twelve people, including two who had opposed the project, to spend an afternoon writing down why it had failed. The exercise surfaced 31 risks. The most important was the water permit: the plant needed a permit that the local authority had taken 14 months to issue for a similar facility. Coho applied for the permit before signing construction contracts. “We would have found it anyway, but we would have found it after we had paid for steel,” Park said. The plant opened in September 2026, within 2% of its approved budget. Park said the team revisits the risk list every quarter and closes risks only when the owner provides evidence."
+      },
+      {
+        "url": "https://www.opsleader.example/guides/pre-mortem-how-to",
+        "title": "A practical guide to project pre-mortems",
+        "publisher": "Ops Leader",
+        "published_at": "2025-11-10",
+        "text": "A pre-mortem works best as a 90-minute session held before final approval, not after. The facilitator should be someone without a stake in the project. Participants write risks individually and silently before any discussion, which reduces the influence of the most senior person in the room. The guide recommends ranking risks by likelihood and impact, assigning each of the top ten to an owner, and setting a date by which the owner must report back. It warns that pre-mortems become theatre when they are run on projects that have already been committed, and that they add little value for small, reversible decisions where it is cheaper to try and learn."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["problem", "framework", "steps", "worked_example", "failure_modes", "when_not_to_use"],
+    "allowed_numbers": ["160", "20", "2019", "2025", "22", "40", "2024", "31", "14", "2026", "2", "90", "10"],
+    "must_not_contain": ["eliminates all risk", "prevents overruns"],
+    "traps": ["correlation_as_causation"]
+  }
+}

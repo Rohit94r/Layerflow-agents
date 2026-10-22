@@ -1,0 +1,44 @@
+{
+  "id": "thinking-good-001",
+  "category": "thinking",
+  "label": "good",
+  "description": "Strategy essay: cost discipline as a continuous capability versus one-off cuts. Fictional research institute, companies and people (Trey Research, Adventure Works, Wide World Importers, Elena Novak); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Cost cutting is a capability, not an event",
+      "angle": "Why one-off cost programmes often reverse, and what continuous operating discipline looks like",
+      "region": "global"
+    },
+    "sources": [
+      {
+        "url": "https://www.treyresearch.example/insights/continuous-cost-discipline",
+        "title": "Continuous cost discipline and three-year margins",
+        "publisher": "Trey Research",
+        "published_at": "2026-09-30",
+        "text": "Trey Research analysed 400 listed companies that announced cost-reduction programmes between 2018 and 2022. Companies that ran cost reviews every year, rather than in response to a crisis, reported operating margins 3.1 percentage points higher on average three years after the programme began. Among companies that cut in a single programme, 58% saw their cost base return to its previous level, adjusted for revenue, within three years. The researchers caution that the data show correlation, not causation: companies with continuous reviews also tended to have more stable leadership teams and lower debt. The study found the largest difference in sales, general and administrative costs, where one-off cuts were most likely to reverse. In manufacturing costs, the gap between the two groups was small."
+      },
+      {
+        "url": "https://www.businessdaily.example/companies/adventure-works-rehiring",
+        "title": "Adventure Works rehires after second round of cuts",
+        "publisher": "Business Daily",
+        "published_at": "2026-08-14",
+        "text": "Adventure Works, the outdoor equipment maker, has rehired about 60% of the roles it eliminated in its 2024 restructuring, according to internal figures seen by Business Daily. The company cut 1,100 jobs in 2024, its second programme in five years, promising annual savings of $70m. Chief financial officer James Holt said in an interview that the company had cut too deeply in customer service and product development. “We took out cost we could see and added cost we couldn't,” Holt said, referring to the use of contractors and overtime that followed. The company now plans quarterly reviews of discretionary spending led by business-unit heads rather than a central team."
+      },
+      {
+        "url": "https://www.cfoquarterly.example/essays/budget-zero-question",
+        "title": "The question every budget line should answer",
+        "publisher": "CFO Quarterly",
+        "published_at": "2026-07-02",
+        "text": "Elena Novak, former chief financial officer of Wide World Importers, argues that the problem with most cost programmes is that they are owned by finance and executed by consultants, so the organisation never learns to do it itself. In her essay, Novak describes the practice she introduced: every business-unit head must answer one question for each major cost line once a year — whether they would choose to spend the money if they were starting the business today. “The answer is not always no, but the discipline of asking is what changes behaviour,” she writes. Novak acknowledges the costs of the approach: it takes management time, and in her first year it slowed some investment decisions by several weeks. Critics of continuous reviews argue that they create permanent anxiety among employees and make it harder to retain talent."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["provocation", "the_tension", "competing_views", "what_leaders_miss", "practical_implication"],
+    "allowed_numbers": ["400", "2018", "2022", "3.1", "58", "60", "2024", "1,100", "70"],
+    "must_not_contain": ["proves that", "causes higher margins"],
+    "traps": ["correlation_as_causation"]
+  }
+}

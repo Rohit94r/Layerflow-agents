@@ -1,0 +1,91 @@
+# LayerFlow banned phrases — The Executive Narrative
+# One phrase per line, lowercase. Lines starting with # are comments.
+# The scanner does case-insensitive substring matching, so every entry must be
+# specific enough that it never occurs inside normal, acceptable prose.
+
+# --- Core list (plan §6.3) ---
+in today's fast-paced world
+in today’s fast-paced world
+in today's fast paced world
+game-changer
+game changer
+game-changing
+revolutionize
+revolutionise
+unlock the power
+delve
+tapestry
+it's important to note
+it’s important to note
+it is important to note
+
+# --- Throat-clearing and filler ---
+in conclusion
+in today's digital age
+in today’s digital age
+in an era of
+in the realm of
+let's dive in
+let’s dive in
+dive deep into
+deep dive into the world
+embark on a journey
+navigate the complexities
+navigating the complexities
+it goes without saying
+needless to say
+at the end of the day
+when all is said and done
+only time will tell
+the ever-changing landscape
+the ever-evolving landscape
+competitive landscape is evolving
+ever-evolving
+rapidly evolving landscape
+
+# --- Inflated claims ---
+a testament to
+stands as a testament
+stands as a
+plays a pivotal role
+pivotal moment
+paradigm shift
+unprecedented times
+cutting-edge
+cutting edge
+state-of-the-art
+seamless
+seamlessly
+robust ecosystem
+the power of
+harness the power
+unleash the potential
+unlock the potential
+unlock new possibilities
+take it to the next level
+move the needle
+redefine the future
+shaping the future of
+the future is here
+
+# --- Consultancy fog ---
+synergy
+synergies
+leverage synergies
+holistic approach
+best-in-class
+world-class
+low-hanging fruit
+thought leadership
+value proposition that resonates
+shed light on
+sheds light on
+
+# --- Social / announcement clichés ---
+excited to share
+thrilled to announce
+thrilled to share
+i'm excited to
+i’m excited to
+humbled to announce
+without further ado

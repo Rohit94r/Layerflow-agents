@@ -1,0 +1,37 @@
+{
+  "id": "room-good-002",
+  "category": "room",
+  "label": "good",
+  "description": "Decision narrative reconstructed from an earnings-call transcript in which a robotics maker explains pausing a new plant, plus a trade-press report. Fictional company and people (Fabrikam Robotics, Lena Fischer, Marco Bianchi); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Why Fabrikam Robotics paused its Monterrey plant halfway through construction",
+      "angle": "A capital-allocation decision explained in management's own words: sunk cost versus demand evidence",
+      "region": "latam"
+    },
+    "sources": [
+      {
+        "url": "https://investors.fabrikam-robotics.example/events/q3-2026-call-transcript",
+        "title": "Fabrikam Robotics Q3 2026 earnings call transcript (excerpt)",
+        "publisher": "Fabrikam Robotics (earnings call transcript)",
+        "published_at": "2026-10-21",
+        "text": "LENA FISCHER, CHIEF EXECUTIVE: I want to address Monterrey directly. We have spent $180m of the $410m budget, and we have decided to pause construction for at least two quarters. ANALYST: Why pause rather than finish? You've spent almost half. FISCHER: Because what we've spent is gone either way. The question the board asked us was simple: if we hadn't started, would we start today? With orders where they are, the answer was no. ANALYST: Was that unanimous? FISCHER: No. Marco argued to keep going, and he had good reasons. MARCO BIANCHI, CHIEF FINANCIAL OFFICER: My concern was the cost of restarting. Pausing isn't free. We estimate carrying costs of about $9m a quarter, and some of our contractors will move to other projects. My words to the board were, “A half-built plant is the most expensive kind.” FISCHER: What changed the discussion was the order book. New orders for our heavy-payload line were down 22% year on year in the quarter. We agreed that if orders recover to last year's level for two consecutive quarters, we restart. ANALYST: And if they don't? FISCHER: Then we will have avoided spending $230m on capacity we don't need."
+      },
+      {
+        "url": "https://www.automationweekly.example/news/fabrikam-pauses-monterrey",
+        "title": "Fabrikam halts Monterrey build as heavy-robot orders slide",
+        "publisher": "Automation Weekly",
+        "published_at": "2026-10-22",
+        "text": "Fabrikam Robotics has paused construction of its plant in Monterrey, Mexico, after a fall in orders for its heavy-payload robots, the company told investors on Wednesday. The plant was intended to double production of the company's largest robots by 2028. About 600 construction workers are employed at the site, according to a local contractor. Shares fell 4% after the announcement, though several analysts said the decision showed capital discipline. Rivals have continued to expand capacity in the region, and one analyst said Fabrikam risked ceding share if demand recovered faster than expected. The company said it would retain the land and the completed foundations."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "pass",
+    "min_sources": 2,
+    "required_sections": ["setting", "the_decision", "the_debate", "turning_point", "what_it_reveals"],
+    "allowed_numbers": ["3", "2026", "180", "410", "2", "9", "22", "230", "2028", "600", "4"],
+    "must_not_contain": ["cancelled the plant", "abandoned the plant"],
+    "traps": ["paused_vs_cancelled", "quote_must_be_verbatim"]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "edge-paywalled-001",
+  "category": "deep_dive",
+  "label": "edge",
+  "description": "Paywalled sources: both fetched pages are subscription stubs carrying only a headline and teaser. The extractor should treat them as unusable and research must return insufficient evidence; nothing should be filled in from model memory. Fictional company (Humongous Insurance); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Inside Humongous Insurance's turnaround",
+      "angle": "How a legacy insurer rebuilt underwriting margins",
+      "region": "us"
+    },
+    "sources": [
+      {
+        "url": "https://www.premiumbusiness.example/insurance/humongous-turnaround",
+        "title": "How Humongous Insurance fixed its underwriting",
+        "publisher": "Premium Business Weekly",
+        "published_at": "2026-10-12",
+        "text": "How Humongous Insurance fixed its underwriting. The insurer's new chief executive has spent two years rebuilding the business. Subscribe to continue reading. Already a subscriber? Sign in. Get unlimited access to award-winning journalism for $1 for your first month. Cancel anytime."
+      },
+      {
+        "url": "https://www.insurancemarkets.example/analysis/humongous-margins",
+        "title": "Humongous Insurance: the numbers behind the recovery",
+        "publisher": "Insurance Markets Pro",
+        "published_at": "2026-10-13",
+        "text": "Humongous Insurance: the numbers behind the recovery. This article is available to Pro members only. Log in or start a free trial to read the full analysis, including combined ratio trends, reserve releases and segment margins. You have reached your limit of free articles this month."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "insufficient_evidence",
+    "min_sources": 3,
+    "required_sections": ["snapshot", "business_model", "how_it_makes_money", "strategic_moves", "the_numbers", "moat", "risks", "lessons"],
+    "allowed_numbers": [],
+    "must_not_contain": ["combined ratio of", "reserve releases of"],
+    "traps": ["paywall_stub", "fill_from_memory"]
+  }
+}

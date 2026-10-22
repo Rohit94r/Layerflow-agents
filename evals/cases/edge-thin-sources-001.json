@@ -1,0 +1,30 @@
+{
+  "id": "edge-thin-sources-001",
+  "category": "brief",
+  "label": "edge",
+  "description": "Thin evidence: a single short report with one unnamed-source claim and no corroboration. The research agent must return insufficient evidence (article state needs_sources) rather than pad the pack. Fictional companies (Relecloud, Consolidated Messenger); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Relecloud said to be exploring sale of messaging unit",
+      "angle": "What a sale would mean for enterprise messaging buyers",
+      "region": "us"
+    },
+    "sources": [
+      {
+        "url": "https://www.techbriefs.example/rumours/relecloud-messaging-sale",
+        "title": "Relecloud weighs options for messaging business",
+        "publisher": "Tech Briefs",
+        "published_at": "2026-10-20",
+        "text": "Relecloud is exploring options for its enterprise messaging unit, including a possible sale, according to a person familiar with the company's thinking. No decision has been made and talks are at an early stage, the person said. Consolidated Messenger has been mentioned as a possible buyer. Relecloud did not respond to a request for comment."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "insufficient_evidence",
+    "min_sources": 2,
+    "required_sections": ["lede", "what_happened", "the_numbers", "why_it_matters", "what_to_watch"],
+    "allowed_numbers": [],
+    "must_not_contain": ["agreed to sell", "deal worth", "valued at"],
+    "traps": ["thin_sources", "single_unnamed_source"]
+  }
+}

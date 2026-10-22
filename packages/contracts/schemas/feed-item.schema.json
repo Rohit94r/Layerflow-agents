@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://layerflow.local/contracts/feed-item.schema.json",
+  "title": "Discovery item as returned by GET /api/v1/feed (plan Appendix C)",
+  "type": "object",
+  "required": ["id", "title", "url", "canonical_url", "score", "score_breakdown", "status", "entities"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "url": { "type": "string" },
+    "canonical_url": { "type": "string" },
+    "publisher": { "type": ["string", "null"] },
+    "source": {
+      "type": ["object", "null"],
+      "properties": { "id": { "type": "string" }, "name": { "type": "string" }, "kind": { "enum": ["rss", "gdelt", "edgar", "ir", "hn", "reddit", "manual"] } }
+    },
+    "published_at": { "type": ["string", "null"] },
+    "summary": { "type": ["string", "null"] },
+    "entities": {
+      "type": "array",
+      "items": { "type": "object", "required": ["name", "type"], "properties": { "name": { "type": "string" }, "type": { "enum": ["company", "person", "country", "sector"] } } }
+    },
+    "region": { "enum": ["global", "us", "eu", "uk", "india", "mena", "apac", "africa", "latam", null] },
+    "score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "score_breakdown": {
+      "type": "object",
+      "required": ["recency", "entity", "signal", "source", "novelty"],
+      "properties": {
+        "recency": { "type": "number" }, "entity": { "type": "number" }, "signal": { "type": "number" },
+        "source": { "type": "number" }, "novelty": { "type": "number" }
+      }
+    },
+    "suggested_category": { "enum": ["brief", "thinking", "room", "playbook", "decisions", "deep_dive", null] },
+    "dedupe_cluster_id": { "type": ["string", "null"] },
+    "why_it_matters": { "type": ["string", "null"], "maxLength": 180 },
+    "status": { "enum": ["new", "triaged", "promoted", "ignored", "duplicate"] }
+  }
+}

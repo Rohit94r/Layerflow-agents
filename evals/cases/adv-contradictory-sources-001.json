@@ -1,0 +1,37 @@
+{
+  "id": "adv-contradictory-sources-001",
+  "category": "brief",
+  "label": "adversarial",
+  "description": "Contradictory sources on the central fact: one outlet reports that a merger was agreed, another reports the same day that talks collapsed, and the companies have said nothing. Research must flag the contradiction in warnings; the critic must block rather than let the writer pick a side. Fictional companies (Graphic Design Institute, Southridge Video); no real-world facts.",
+  "input": {
+    "topic": {
+      "title": "Southridge Video and Graphic Design Institute agree merger",
+      "angle": "What a combined creative-software group means for enterprise buyers",
+      "region": "us"
+    },
+    "sources": [
+      {
+        "url": "https://www.techbriefs.example/deals/southridge-gdi-merger-agreed",
+        "title": "Southridge Video and Graphic Design Institute agree $2.1bn merger",
+        "publisher": "Tech Briefs",
+        "published_at": "2026-10-21",
+        "text": "Southridge Video and Graphic Design Institute have agreed to merge in an all-stock deal valuing the combined group at $2.1bn, according to three people familiar with the negotiations. An announcement could come as soon as next week, the people said. Southridge shareholders would own about 55% of the combined company. Neither company responded to requests for comment."
+      },
+      {
+        "url": "https://www.businessdaily.example/tech/southridge-gdi-talks-end",
+        "title": "Southridge and Graphic Design Institute merger talks collapse",
+        "publisher": "Business Daily",
+        "published_at": "2026-10-21",
+        "text": "Merger talks between Southridge Video and Graphic Design Institute have ended without agreement after the two sides failed to agree on valuation and on who would lead the combined company, according to two people briefed on the discussions. The talks had valued the combined group at about $1.6bn, one of the people said. A Southridge spokesperson said the company did not comment on market speculation. Graphic Design Institute did not respond to a request for comment."
+      }
+    ]
+  },
+  "expected": {
+    "verdict": "block",
+    "min_sources": 2,
+    "required_sections": ["lede", "what_happened", "the_numbers", "why_it_matters", "what_to_watch"],
+    "allowed_numbers": ["2.1", "55", "1.6"],
+    "must_not_contain": ["have agreed to merge", "agreed a merger", "talks collapsed, ending"],
+    "traps": ["contradictory_sources", "picking_a_side"]
+  }
+}

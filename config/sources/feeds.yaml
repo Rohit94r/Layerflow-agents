@@ -1,0 +1,374 @@
+# LayerFlow discovery sources — The Executive Narrative (tenant: ten)
+#
+# Every source here is keyless (plan §2.1 tier A, or tier B where marked).
+# Seeded into the `sources` table on bootstrap; editable afterwards from
+# Settings → Sources. Sources already present (matched by URL) are left as-is.
+#
+# Fields
+#   kind    rss | gdelt | edgar | ir | hn | reddit
+#   weight  0.3–1.5 source-quality weight used by the discovery score (plan §5 A1)
+#   region  global | us | eu | uk | india | mena | apac | africa | latam
+#   active  false = kept for reference but not fetched
+#
+# Lines marked `# verify` are feeds whose URL was not confirmed at the time of
+# writing. They ship inactive; test them from Settings → Sources → Test and
+# switch them on if they return items.
+#
+# Compliance (plan §10.4): feeds and APIs are published for syndication and are
+# fetched as such. Article pages reached from them are fetched only by the
+# research agent, which honours robots.txt and rate limits.
+
+version: 1
+sources:
+
+  # ── Global business press ────────────────────────────────────────────────
+  - name: BBC Business
+    kind: rss
+    url: https://feeds.bbci.co.uk/news/business/rss.xml
+    weight: 1.2
+    region: uk
+    active: true
+
+  - name: The Guardian — Business
+    kind: rss
+    url: https://www.theguardian.com/uk/business/rss
+    weight: 1.1
+    region: uk
+    active: true
+
+  - name: New York Times — Business
+    kind: rss
+    url: https://rss.nytimes.com/services/xml/rss/nyt/Business.xml
+    weight: 1.3
+    region: us
+    active: true
+
+  - name: New York Times — DealBook
+    kind: rss
+    url: https://rss.nytimes.com/services/xml/rss/nyt/Dealbook.xml
+    weight: 1.3
+    region: us
+    active: true
+
+  - name: Wall Street Journal — Markets
+    kind: rss
+    url: https://feeds.a.dj.com/rss/RSSMarketsMain.xml
+    weight: 1.3
+    region: us
+    active: true
+
+  - name: Wall Street Journal — US Business
+    kind: rss
+    url: https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml
+    weight: 1.3
+    region: us
+    active: true
+
+  - name: MarketWatch — Top Stories
+    kind: rss
+    url: https://feeds.content.dowjones.io/public/rss/mw_topstories
+    weight: 1.0
+    region: us
+    active: true
+
+  - name: CNBC — Business News
+    kind: rss
+    url: https://www.cnbc.com/id/10001147/device/rss/rss.html
+    weight: 1.0
+    region: us
+    active: true
+
+  - name: CNBC — Top News
+    kind: rss
+    url: https://www.cnbc.com/id/100003114/device/rss/rss.html
+    weight: 0.9
+    region: us
+    active: true
+
+  - name: Financial Times — Home
+    kind: rss
+    url: https://www.ft.com/rss/home
+    weight: 1.3          # headlines are free; most article pages are paywalled, so research skips them
+    region: global
+    active: true
+
+  - name: The Economist — Business
+    kind: rss
+    url: https://www.economist.com/business/rss.xml
+    weight: 1.3
+    region: global
+    active: true
+
+  - name: Fortune
+    kind: rss
+    url: https://fortune.com/feed/
+    weight: 1.0
+    region: us
+    active: true
+
+  - name: Yahoo Finance — News
+    kind: rss
+    url: https://finance.yahoo.com/news/rssindex
+    weight: 0.8
+    region: us
+    active: true
+
+  - name: Al Jazeera — All News
+    kind: rss
+    url: https://www.aljazeera.com/xml/rss/all.xml
+    weight: 0.9
+    region: mena
+    active: true
+
+  - name: Bloomberg — Markets
+    kind: rss
+    url: https://feeds.bloomberg.com/markets/news.rss   # verify
+    weight: 1.3
+    region: global
+    active: false
+
+  - name: Business Insider — All
+    kind: rss
+    url: https://feeds.businessinsider.com/custom/all   # verify
+    weight: 0.7
+    region: us
+    active: false
+
+  - name: Forbes — Business
+    kind: rss
+    url: https://www.forbes.com/business/feed/   # verify
+    weight: 0.8
+    region: us
+    active: false
+
+  # ── Management & strategy ────────────────────────────────────────────────
+  - name: Harvard Business Review
+    kind: rss
+    url: http://feeds.hbr.org/harvardbusiness
+    weight: 1.2
+    region: global
+    active: true
+
+  - name: MIT Sloan Management Review
+    kind: rss
+    url: https://sloanreview.mit.edu/feed/
+    weight: 1.2
+    region: global
+    active: true
+
+  - name: McKinsey — Insights
+    kind: rss
+    url: https://www.mckinsey.com/insights/rss   # verify
+    weight: 1.1
+    region: global
+    active: false
+
+  - name: Fast Company — Latest
+    kind: rss
+    url: https://www.fastcompany.com/latest/rss   # verify
+    weight: 0.8
+    region: us
+    active: false
+
+  # ── Technology & startups ────────────────────────────────────────────────
+  - name: TechCrunch
+    kind: rss
+    url: https://techcrunch.com/feed/
+    weight: 1.0
+    region: global
+    active: true
+
+  - name: Crunchbase News
+    kind: rss
+    url: https://news.crunchbase.com/feed/
+    weight: 1.0
+    region: global
+    active: true
+
+  - name: The Verge
+    kind: rss
+    url: https://www.theverge.com/rss/index.xml
+    weight: 0.7
+    region: us
+    active: true
+
+  - name: Ars Technica
+    kind: rss
+    url: https://feeds.arstechnica.com/arstechnica/index
+    weight: 0.7
+    region: us
+    active: true
+
+  # ── India ────────────────────────────────────────────────────────────────
+  - name: Economic Times — Top Stories
+    kind: rss
+    url: https://economictimes.indiatimes.com/rssfeedstopstories.cms
+    weight: 1.0
+    region: india
+    active: true
+
+  - name: Economic Times — Markets
+    kind: rss
+    url: https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms
+    weight: 1.0
+    region: india
+    active: true
+
+  - name: Mint — Companies
+    kind: rss
+    url: https://www.livemint.com/rss/companies
+    weight: 1.0
+    region: india
+    active: true
+
+  - name: Moneycontrol — Business
+    kind: rss
+    url: https://www.moneycontrol.com/rss/business.xml
+    weight: 0.9
+    region: india
+    active: true
+
+  - name: Inc42
+    kind: rss
+    url: https://inc42.com/feed/
+    weight: 0.9
+    region: india
+    active: true
+
+  - name: YourStory
+    kind: rss
+    url: https://yourstory.com/feed
+    weight: 0.8
+    region: india
+    active: true
+
+  - name: Business Standard — Companies
+    kind: rss
+    url: https://www.business-standard.com/rss/companies-101.rss   # verify
+    weight: 1.0
+    region: india
+    active: false
+
+  - name: Hindu BusinessLine
+    kind: rss
+    url: https://www.thehindubusinessline.com/feeder/default.rss   # verify
+    weight: 0.9
+    region: india
+    active: false
+
+  # ── Company newsrooms / investor relations (primary sources) ─────────────
+  - name: Microsoft — News Center
+    kind: ir
+    url: https://news.microsoft.com/feed/
+    weight: 1.2
+    region: us
+    active: true
+
+  - name: NVIDIA — Newsroom Releases
+    kind: ir
+    url: https://nvidianews.nvidia.com/releases.xml
+    weight: 1.2
+    region: us
+    active: true
+
+  - name: Apple — Newsroom
+    kind: ir
+    url: https://www.apple.com/newsroom/rss-feed.rss
+    weight: 1.2
+    region: us
+    active: true
+
+  # ── Query feeds (tier B: keyless but rate-limited; cached with backoff) ──
+  - name: Google News — M&A (24h)
+    kind: rss
+    url: "https://news.google.com/rss/search?q=acquisition+OR+merger+when:1d&hl=en-US&gl=US&ceid=US:en"
+    weight: 0.8
+    region: global
+    active: true
+
+  - name: Google News — Funding rounds (24h)
+    kind: rss
+    url: "https://news.google.com/rss/search?q=%22funding+round%22+OR+%22raises%22+%22Series%22+when:1d&hl=en-US&gl=US&ceid=US:en"
+    weight: 0.8
+    region: global
+    active: true
+
+  - name: Google News — India business (24h)
+    kind: rss
+    url: "https://news.google.com/rss/search?q=india+business+OR+company+OR+deal+when:1d&hl=en-IN&gl=IN&ceid=IN:en"
+    weight: 0.8
+    region: india
+    active: true
+
+  - name: Google News — CEO appointments (24h)
+    kind: rss
+    url: "https://news.google.com/rss/search?q=%22appoints%22+%22chief+executive%22+OR+%22names+CEO%22+when:1d&hl=en-US&gl=US&ceid=US:en"
+    weight: 0.8
+    region: global
+    active: true
+
+  - name: Bing News — Capex & new plants
+    kind: rss
+    url: "https://www.bing.com/news/search?q=capex+OR+%22new+plant%22+OR+%22factory+investment%22&format=rss"
+    weight: 0.7
+    region: global
+    active: true
+
+  - name: Bing News — Quarterly earnings
+    kind: rss
+    url: "https://www.bing.com/news/search?q=%22quarterly+results%22+OR+%22quarterly+earnings%22&format=rss"
+    weight: 0.7
+    region: global
+    active: true
+
+  # ── GDELT 2.0 DOC API (tier A, keyless) ──────────────────────────────────
+  - name: GDELT — Deals & funding (English, 24h)
+    kind: gdelt
+    url: "https://api.gdeltproject.org/api/v2/doc/doc?query=(merger%20OR%20acquisition%20OR%20%22funding%20round%22)%20sourcelang:english&mode=artlist&format=json&maxrecords=75&timespan=24h&sort=datedesc"
+    weight: 0.7
+    region: global
+    active: true
+
+  - name: GDELT — India corporate (English, 24h)
+    kind: gdelt
+    url: "https://api.gdeltproject.org/api/v2/doc/doc?query=(acquisition%20OR%20investment%20OR%20IPO)%20sourcecountry:india%20sourcelang:english&mode=artlist&format=json&maxrecords=75&timespan=24h&sort=datedesc"
+    weight: 0.7
+    region: india
+    active: true
+
+  # ── SEC EDGAR (primary filings; requires a descriptive User-Agent) ───────
+  - name: SEC EDGAR — Latest 8-K filings
+    kind: edgar
+    url: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start=0&count=40&output=atom"
+    weight: 1.5
+    region: us
+    active: true
+
+  # ── Community signal (low weight; early trends, never sole evidence) ─────
+  - name: Hacker News — Popular stories
+    kind: hn
+    url: "https://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=points>40"
+    weight: 0.6
+    region: global
+    active: true
+
+  - name: Reddit — r/business (top, 24h)
+    kind: reddit
+    url: https://www.reddit.com/r/business/top.json?t=day&limit=25
+    weight: 0.4
+    region: global
+    active: true
+
+  - name: Reddit — r/economics (top, 24h)
+    kind: reddit
+    url: https://www.reddit.com/r/economics/top.json?t=day&limit=25
+    weight: 0.4
+    region: global
+    active: true
+
+  - name: Reddit — r/startups (top, 24h)
+    kind: reddit
+    url: https://www.reddit.com/r/startups/top.json?t=day&limit=25
+    weight: 0.4
+    region: global
+    active: true
