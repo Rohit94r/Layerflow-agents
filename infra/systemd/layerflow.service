@@ -1,0 +1,19 @@
+# Optional: start the compose stack at boot on the VPS.
+#   sudo cp infra/systemd/layerflow.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now layerflow
+[Unit]
+Description=LayerFlow agent engine (docker compose)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/layerflow
+ExecStart=/usr/bin/docker compose -f docker-compose.yml up -d --remove-orphans
+ExecStop=/usr/bin/docker compose -f docker-compose.yml down
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target

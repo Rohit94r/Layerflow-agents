@@ -1,0 +1,133 @@
+# LayerFlow agent engine — single-VPS stack (plan §19).
+#   cp .env.example .env   # fill secrets
+#   docker compose up -d
+# Only caddy publishes ports. The api container runs migrations + bootstrap on start.
+# Model on another machine (Tailscale)? Remove `local-model` from COMPOSE_PROFILES and set OLLAMA_BASE_URL.
+
+name: layerflow
+
+x-app-env: &app-env
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-layerflow}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-layerflow}
+  OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
+  SITE_ROOT: /data/site
+  ARTIFACTS_DIR: /data/artifacts
+  FETCH_CACHE_DIR: /data/cache
+  BACKUP_DIR: /data/backups
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-layerflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-layerflow}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-layerflow} -d ${POSTGRES_DB:-layerflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    mem_limit: 512m
+    logging: &logging
+      driver: json-file
+      options: { max-size: "50m", max-file: "5" }
+
+  ollama:
+    image: ollama/ollama:latest   # pin a tested tag after Phase 0 benchmarking
+    profiles: ["local-model"]
+    restart: unless-stopped
+    environment:
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_KEEP_ALIVE: 15m
+    volumes:
+      - ollama_models:/root/.ollama
+    logging: *logging
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: layerflow-api:latest
+    restart: unless-stopped
+    command: ["api"]
+    env_file: .env
+    environment: *app-env
+    volumes:
+      - artifacts:/data/artifacts
+      - cache:/data/cache
+      - site:/data/site
+      - backups:/data/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5).status == 200 else 1)"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    mem_limit: 512m
+    logging: *logging
+
+  worker:
+    image: layerflow-api:latest
+    restart: unless-stopped
+    command: ["worker"]
+    env_file: .env
+    environment: *app-env
+    volumes:
+      - artifacts:/data/artifacts
+      - cache:/data/cache
+      - site:/data/site
+    depends_on:
+      api:
+        condition: service_healthy
+    stop_grace_period: 30s
+    mem_limit: 768m
+    logging: *logging
+
+  web:
+    build:
+      context: apps/web
+    image: layerflow-web:latest
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:8000
+      NEXT_TELEMETRY_DISABLED: "1"
+    depends_on:
+      api:
+        condition: service_healthy
+    mem_limit: 384m
+    logging: *logging
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+    mem_limit: 64m
+    logging: *logging
+
+volumes:
+  pgdata:
+  ollama_models:
+  artifacts:
+  cache:
+  site:
+  backups:
+  caddy_data:
+  caddy_config:

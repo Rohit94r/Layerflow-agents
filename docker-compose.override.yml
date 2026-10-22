@@ -1,0 +1,32 @@
+# Local development overrides (picked up automatically by `docker compose up`).
+# Exposes service ports on localhost and hot-reloads the API. Delete or rename this file on the VPS,
+# or run `docker compose -f docker-compose.yml up -d` there.
+
+services:
+  postgres:
+    ports: ["127.0.0.1:5432:5432"]
+
+  ollama:
+    ports: ["127.0.0.1:11434:11434"]
+
+  api:
+    command: ["sh", "-c", "python -m app.cli migrate && python -m app.cli bootstrap && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"]
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      APP_ENV: development
+      APP_BASE_URL: http://localhost:3000
+    volumes:
+      - ./apps/api/app:/app/app
+      - ./prompts:/srv/layerflow/prompts
+      - ./config:/srv/layerflow/config
+      - ./templates:/srv/layerflow/templates
+
+  worker:
+    volumes:
+      - ./apps/api/app:/app/app
+      - ./prompts:/srv/layerflow/prompts
+      - ./config:/srv/layerflow/config
+      - ./templates:/srv/layerflow/templates
+
+  web:
+    ports: ["127.0.0.1:3000:3000"]

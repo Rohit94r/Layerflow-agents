@@ -1,0 +1,9 @@
+# Runs scripts/backup.sh (pg_dump + artifacts). Triggered daily by layerflow-backup.timer.
+[Unit]
+Description=LayerFlow daily backup
+After=layerflow.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/layerflow
+ExecStart=/opt/layerflow/scripts/backup.sh

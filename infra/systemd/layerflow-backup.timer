@@ -1,0 +1,10 @@
+# sudo cp infra/systemd/layerflow-backup.* /etc/systemd/system/ && sudo systemctl enable --now layerflow-backup.timer
+[Unit]
+Description=Daily LayerFlow backup at 02:00
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
