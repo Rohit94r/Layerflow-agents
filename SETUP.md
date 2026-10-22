@@ -240,6 +240,28 @@ individual fields instead: `database.status = ok`, `model.provider = ollama`, `m
 `worker.status = ok`.
 Once the worker has run discovery, the overall status becomes `ok`.
 
+### Moving to a stronger machine (the real-model run)
+
+Everything committed is in git; `.env`, `.venv`, `node_modules` and `data/` are not, so each machine is set up
+fresh (that is fine — the database is only demo data):
+
+```bash
+git pull                                  # or clone
+cd apps/api
+python3.12 -m venv .venv && .venv/bin/pip install -e ".[dev]"
+# create apps/api/.env from §3 with MODEL_PROVIDER=ollama
+.venv/bin/python -m app.cli migrate
+.venv/bin/python -m app.cli bootstrap
+# first visit to /login → "Create account" (becomes owner), or:
+# .venv/bin/python -m app.cli create-admin --email you@example.com --password "a-long-password"
+# then pull the models above and start API + worker + web (§5, §6)
+```
+
+If the model runs on a different box (e.g. a GPU desktop over Tailscale), start Ollama there with
+`OLLAMA_HOST=0.0.0.0` and set `OLLAMA_BASE_URL=http://<that-ip>:11434` in `.env`. The app, database and
+worker can stay on the small machine; only generation is remote. `docker compose` (§8) does the same thing
+in containers.
+
 ---
 
 ## 4. pnpm — everything used here
