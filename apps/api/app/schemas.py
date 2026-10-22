@@ -23,6 +23,14 @@ class LoginIn(Body):
     password: str = Field(min_length=1, max_length=512)
 
 
+class SetupIn(Body):
+    """First-run owner account. Only accepted while the instance has no users."""
+
+    email: EmailStr
+    password: str = Field(min_length=10, max_length=512)
+    name: str | None = Field(default=None, min_length=2, max_length=200)
+
+
 # ---- discovery ----
 class FeedRefreshIn(Body):
     source_id: str | None = None

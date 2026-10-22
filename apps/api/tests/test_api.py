@@ -5,11 +5,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 from app.core.config import get_settings
 from app.core.db import session_factory
-from app.models import Article, FeedItem, Job, Publication, SocialPost, Source
+from app.models import Article, FeedItem, Job, Publication, SocialPost, Source, User
 from tests.conftest import ADMIN_PASSWORD, login
 
 API = "/api/v1"
@@ -31,6 +31,31 @@ async def test_login_rate_limit(client):
         await client.post(f"{API}/auth/login", json={"email": "owner@ten.example", "password": "nope-nope-nope"})
     r = await client.post(f"{API}/auth/login", json={"email": "owner@ten.example", "password": ADMIN_PASSWORD})
     assert r.status_code == 429
+
+
+async def test_first_run_setup_creates_only_owner(client, tenant):
+    async with session_factory()() as db:
+        await db.execute(delete(User))
+        await db.commit()
+    assert (await client.get(f"{API}/auth/setup")).json()["needs_setup"] is True
+    r = await client.post(
+        f"{API}/auth/setup",
+        json={"name": "Founder", "email": "founder@ten.example", "password": "a-long-password"},
+    )
+    assert r.status_code == 200 and r.json()["user"]["role"] == "owner"
+    assert (await client.get(f"{API}/auth/me")).json()["user"]["email"] == "founder@ten.example"
+    # No open sign-up: once an account exists, setup is closed
+    again = await client.post(f"{API}/auth/setup", json={"email": "x@ten.example", "password": "a-long-password"})
+    assert again.status_code == 409 and again.json()["error"]["code"] == "setup_complete"
+    assert (await client.get(f"{API}/auth/setup")).json()["needs_setup"] is False
+
+
+async def test_setup_rejects_short_password(client, tenant):
+    async with session_factory()() as db:
+        await db.execute(delete(User))
+        await db.commit()
+    r = await client.post(f"{API}/auth/setup", json={"email": "x@ten.example", "password": "short"})
+    assert r.status_code == 422
 
 
 async def test_csrf_required_on_mutations(authed):

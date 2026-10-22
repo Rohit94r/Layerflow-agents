@@ -206,6 +206,22 @@ cd apps\web
 pnpm run dev
 ```
 
+> If the instance has **no users yet**, `/login` shows a **Create account** form instead — the first account
+> becomes the owner. That is the only open sign-up: once an account exists the form is replaced by sign-in,
+> and further users are created by an owner (`python -m app.cli create-admin --email … --password …`).
+
+Before a demo also run `npm run build` once (production build; catches anything `dev` mode tolerates).
+
+---
+
+## 7. The model (Ollama)
+
+```bash
+ollama pull qwen2.5:3b-instruct      # ~1.9 GB — fast; routing, short copy
+ollama pull qwen2.5:7b-instruct      # ~4.7 GB — the writer; needs ~8 GB free RAM
+ollama pull nomic-embed-text         # ~0.3 GB — dedupe embeddings (optional)
+```
+
 Both start the same Next.js server on port 3000.
 
 Open **http://localhost:3000**. Authentication is disabled on this device
