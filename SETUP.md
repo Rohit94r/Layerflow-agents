@@ -42,8 +42,7 @@ College machines sometimes block installers. Python and Node have "zip / no-admi
 
 ```bash
 git clone https://github.com/Rohit94r/Layerflow-agents.git
-cd Layerflow-agents
-git checkout feat/end-to-end-build      # the full build lives here until it is merged into main
+cd Layerflow-agents                      # everything is on the main branch
 ```
 
 ---
