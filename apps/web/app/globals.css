@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Ink & paper, one accent. Editorial, not "AI tool". */
+:root {
+  --bg: #f6f3ec;
+  --surface: #fffdf8;
+  --surface-2: #f0ebe1;
+  --surface-3: #e8e1d4;
+  --ink: #17191e;
+  --ink-2: #434852;
+  --muted: #7b7f88;
+  --line: #e1d9ca;
+  --line-strong: #cfc5b2;
+  --accent: #8a3b12;
+  --accent-2: #a9531f;
+  --accent-soft: #f3e4d8;
+  --accent-ink: #fffaf4;
+  --ok: #2f6b3a;
+  --ok-soft: #e3efe2;
+  --warn: #9a6210;
+  --warn-soft: #f6ead2;
+  --bad: #a3261f;
+  --bad-soft: #f6dfdb;
+  --info: #1f4f7a;
+  --info-soft: #e0eaf3;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #111215;
+  --surface: #18191d;
+  --surface-2: #202227;
+  --surface-3: #2a2c32;
+  --ink: #ece8e0;
+  --ink-2: #c2bdb4;
+  --muted: #8b8e96;
+  --line: #2c2e34;
+  --line-strong: #3b3e45;
+  --accent: #d48a58;
+  --accent-2: #e29d6c;
+  --accent-soft: #3a261a;
+  --accent-ink: #1a1009;
+  --ok: #73b580;
+  --ok-soft: #1c2b1f;
+  --warn: #e0a84e;
+  --warn-soft: #33281a;
+  --bad: #e66f63;
+  --bad-soft: #3a1d1b;
+  --info: #7fadd8;
+  --info-soft: #1a2633;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Source Serif 4", "Source Serif Pro", Georgia, Cambria, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.font-display {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Calm scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+/* Article prose (editor previews, diffs) */
+.prose-article p {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.65;
+  margin: 0 0 0.85em;
+}
+.prose-article h3 {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 1.2em 0 0.4em;
+}
+
+.diff-add {
+  background: var(--ok-soft);
+  color: var(--ok);
+  text-decoration: none;
+}
+.diff-del {
+  background: var(--bad-soft);
+  color: var(--bad);
+  text-decoration: line-through;
+}
+
+@keyframes lf-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.skeleton {
+  background: var(--surface-2);
+  border-radius: 4px;
+  animation: lf-pulse 1.4s ease-in-out infinite;
+}
