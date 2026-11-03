@@ -68,13 +68,20 @@ async def default_resolver(host: str, port: int) -> list[str]:
     return sorted({info[4][0] for info in infos})
 
 
+_NAT64_WELL_KNOWN = ipaddress.ip_network("64:ff9b::/96")
+
+
 def _is_public_ip(ip: str) -> bool:
     try:
         addr = ipaddress.ip_address(ip.split("%")[0])
     except ValueError:
         return False
-    if isinstance(addr, ipaddress.IPv6Address) and addr.ipv4_mapped:
-        addr = addr.ipv4_mapped
+    if isinstance(addr, ipaddress.IPv6Address):
+        if addr.ipv4_mapped:
+            addr = addr.ipv4_mapped
+        elif addr in _NAT64_WELL_KNOWN:
+            # IPv6-only networks use NAT64; judge the embedded IPv4 destination, never the wrapper.
+            return _is_public_ip(str(ipaddress.IPv4Address(int(addr) & 0xFFFFFFFF)))
     return not (
         addr.is_private
         or addr.is_loopback

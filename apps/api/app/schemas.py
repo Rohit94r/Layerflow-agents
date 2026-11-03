@@ -57,6 +57,8 @@ class SourceIn(Body):
     url: HttpUrl
     weight: float = Field(default=1.0, ge=0.1, le=2.0)
     region: Region | None = None
+    group: str | None = Field(default=None, max_length=32)
+    tier: str | None = Field(default=None, max_length=16)
     active: bool = True
 
 
@@ -66,6 +68,8 @@ class SourcePatch(Body):
     kind: SourceKind | None = None
     weight: float | None = Field(default=None, ge=0.1, le=2.0)
     region: Region | None = None
+    group: str | None = Field(default=None, max_length=32)
+    tier: str | None = Field(default=None, max_length=16)
     active: bool | None = None
 
 

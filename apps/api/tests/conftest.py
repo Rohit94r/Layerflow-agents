@@ -82,7 +82,9 @@ ARTICLE_2 = """
 RSS = """<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>Example Business</title>
 <item><title>Northwind Logistics commits $2.1 billion to automated warehouses</title><link>https://news.example.com/northwind-warehouses?utm_source=rss</link>
-<description>Northwind will invest 2.1 billion dollars in 14 automated warehouses, its CEO said.</description><pubDate>{now}</pubDate></item>
+<description>Northwind will invest 2.1 billion dollars in 14 automated warehouses, its CEO said.</description>
+<enclosure url="https://cdn.example.com/northwind-hero.jpg" type="image/jpeg" width="1200" height="675"/>
+<pubDate>{now}</pubDate></item>
 <item><title>Northwind Logistics commits $2.1 billion to automated warehouses - Example Wire</title><link>https://wire.example.org/northwind-dup</link>
 <description>Same story syndicated.</description><pubDate>{now}</pubDate></item>
 <item><title>Contoso Bank appoints new chief executive after board review</title><link>https://news.example.com/contoso-ceo</link>

@@ -17,7 +17,7 @@ interface TestResult {
   item_count: number;
   latency_ms: number;
   error: string | null;
-  sample: { title: string; url: string; published_at: string | null }[];
+  sample: { title: string; url: string; published_at: string | null; image_url: string | null }[];
 }
 
 function SourceDialog({ source, onClose }: { source?: Source; onClose: () => void }) {
@@ -146,8 +146,13 @@ export function SourcesSettings({ isOwner, canContent }: { isOwner: boolean; can
                               </p>
                               <ul className="mt-1 space-y-0.5">
                                 {r.sample.map((i) => (
-                                  <li key={i.url} className="truncate text-ink-2">
-                                    {i.title}
+                                  <li key={i.url} className="flex items-center gap-1.5 truncate text-ink-2">
+                                    {i.image_url ? (
+                                      <img src={i.image_url} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-5 w-8 shrink-0 rounded border border-line object-cover" />
+                                    ) : (
+                                      <span className="h-5 w-8 shrink-0 rounded border border-dashed border-line" aria-hidden />
+                                    )}
+                                    <span className="truncate">{i.title}</span>
                                   </li>
                                 ))}
                               </ul>
@@ -159,8 +164,12 @@ export function SourcesSettings({ isOwner, canContent }: { isOwner: boolean; can
                       ) : null}
                     </td>
                     <td className={td}>
-                      <Badge>{s.kind}</Badge>
-                      {s.region ? <span className="ml-1 text-[11px] text-muted">{s.region.toUpperCase()}</span> : null}
+                      <div className="flex flex-wrap items-center gap-1">
+                        <Badge>{s.kind}</Badge>
+                        {s.region ? <span className="text-[11px] text-muted">{s.region.toUpperCase()}</span> : null}
+                        {s.tier ? <Badge tone={s.tier === "validation" ? "ok" : s.tier === "primary_daily" ? "accent" : "neutral"}>{s.tier.replaceAll("_", " ")}</Badge> : null}
+                      </div>
+                      {s.group ? <p className="mt-1 text-[11px] text-muted">{s.group.replaceAll("_", " ")}</p> : null}
                     </td>
                     <td className={`${td} tabular`}>{s.weight.toFixed(1)}</td>
                     <td className={`${td} tabular`}>{s.items_7d ?? 0}</td>

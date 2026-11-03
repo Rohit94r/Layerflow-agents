@@ -38,6 +38,7 @@ class Article(Base):
     state: Mapped[str] = mapped_column(String(32), nullable=False, default="queued")
     title: Mapped[str] = mapped_column(Text, nullable=False, default="")
     slug: Mapped[str | None] = mapped_column(String(80))
+    cover_image_url: Mapped[str | None] = mapped_column(Text)  # lead image carried over from the promoted feed item
     content_hash: Mapped[str | None] = mapped_column(String(64))
     current_version_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     quality_score: Mapped[float | None] = mapped_column(Float)

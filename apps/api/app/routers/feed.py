@@ -22,7 +22,7 @@ from app.schemas import BulkPromoteIn, FeedRefreshIn, IgnoreIn, PromoteIn, Sourc
 from app.serializers import article_summary, feed_item_out, job_out, source_out, topic_out
 from app.services.dedupe import TfidfIndex
 from app.services.feeds import FeedParseError, parse_ir_html, parse_source
-from app.services.fetcher import FetchError, Fetcher
+from app.services.fetcher import Fetcher, FetchError
 
 router = APIRouter(tags=["discovery"])
 
@@ -185,7 +185,7 @@ async def _promote(db: AsyncSession, principal: Principal, item: FeedItem, *, ca
     )
     db.add(topic)
     await db.flush()
-    article = Article(tenant_id=principal.tenant_id, topic_id=topic.id, category=cat, state="queued", title=item.title[:300], created_by=principal.user.id)
+    article = Article(tenant_id=principal.tenant_id, topic_id=topic.id, category=cat, state="queued", title=item.title[:300], cover_image_url=item.image_url, created_by=principal.user.id)
     db.add(article)
     await db.flush()
     item.status = "promoted"
@@ -263,7 +263,7 @@ async def create_source(body: SourceIn, principal: Principal = Depends(require(R
     exists = (await db.execute(select(Source.id).where(Source.tenant_id == principal.tenant_id, Source.url == url))).scalar_one_or_none()
     if exists:
         raise conflict("duplicate_source", "A source with this URL already exists")
-    src = Source(tenant_id=principal.tenant_id, kind=body.kind, name=body.name, url=url, weight=body.weight, region=body.region, active=body.active)
+    src = Source(tenant_id=principal.tenant_id, kind=body.kind, name=body.name, url=url, weight=body.weight, region=body.region, group=body.group, tier=body.tier, active=body.active)
     db.add(src)
     await db.flush()
     audit(db, tenant_id=principal.tenant_id, actor_type="user", actor_id=principal.user.id, action="source.create", entity="source", entity_id=src.id, detail={"url": url})
@@ -315,5 +315,13 @@ async def test_source(source_id: str, principal: Principal = Depends(require(ROL
         "item_count": len(items),
         "latency_ms": latency,
         "error": error,
-        "sample": [{"title": i.title, "url": i.url, "published_at": i.published_at.isoformat() if i.published_at else None} for i in items[:5]],
+        "sample": [
+            {
+                "title": i.title,
+                "url": i.url,
+                "published_at": i.published_at.isoformat() if i.published_at else None,
+                "image_url": i.image_url,
+            }
+            for i in items[:5]
+        ],
     }

@@ -35,18 +35,19 @@ def slugify(text: str, *, max_len: int = MAX_LEN, max_words: int = MAX_WORDS) ->
     toks = [t for t in _tokens(text) if not _is_date_token(t)]
     # Keep only content words: stopwords add no meaning to a URL.
     toks = [t for t in toks if t not in SLUG_STOPWORDS]
-    toks = toks[:max_words]
+    if not toks:
+        return "article"
+    if len(toks) > max_words:
+        toks = toks[:max_words]
     out: list[str] = []
     for tok in toks:
         candidate = "-".join([*out, tok])
         if len(candidate) > max_len:
             break
         out.append(tok)
-    while out and out[-1] in SLUG_STOPWORDS:
-        out.pop()
     slug = "-".join(out)
     if not slug:
-        slug = "article"
+        return "article"
     return slug
 
 

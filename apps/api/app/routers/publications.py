@@ -55,6 +55,11 @@ async def schedule(body: PublicationIn, principal: Principal = Depends(require(R
     if not seo.get("slug"):
         raise conflict("seo_missing", "Run SEO before scheduling")
     key = publisher.idempotency_key(tenant.slug, seo["slug"], article.content_hash or "", target)
+    existing = (await db.execute(select(Publication).where(Publication.idempotency_key == key))).scalar_one_or_none()
+    if existing is not None and existing.status in ("scheduled", "publishing", "published"):
+        return {**publication_out(existing, article), "idempotent": True, "reason": "This exact version is already scheduled or published"}
+    if article.state not in ("approved", "published"):
+        raise conflict("not_approved", f"Only approved articles can be scheduled (state: {article.state})")
     if body.scheduled_at:
         when = body.scheduled_at if body.scheduled_at.tzinfo else body.scheduled_at.replace(tzinfo=ZoneInfo(tenant.timezone))
         if when < utcnow() - timedelta(minutes=1):
@@ -65,9 +70,6 @@ async def schedule(body: PublicationIn, principal: Principal = Depends(require(R
             cadence=effective(tenant.settings)["cadence"], timezone=tenant.timezone, category=article.category,
             taken=await scheduler.taken_slots(db, tenant.id),
         )
-    existing = (await db.execute(select(Publication).where(Publication.idempotency_key == key))).scalar_one_or_none()
-    if existing is not None and existing.status in ("scheduled", "publishing", "published"):
-        return {**publication_out(existing, article), "idempotent": True, "reason": "This exact version is already scheduled or published"}
     pub = existing or Publication(tenant_id=tenant.id, article_id=article.id, target=target, idempotency_key=key, created_by=principal.user.id)
     pub.version_id = article.current_version_id
     pub.status = "scheduled"

@@ -21,6 +21,8 @@ class Source(Base):
     url: Mapped[str] = mapped_column(Text, nullable=False)
     weight: Mapped[float] = mapped_column(Float, nullable=False, default=1.0)
     region: Mapped[str | None] = mapped_column(String(16))
+    group: Mapped[str | None] = mapped_column(String(32))  # catalog group (global_business, gcc_business, ai_infra …)
+    tier: Mapped[str | None] = mapped_column(String(16))  # primary_daily | regional | specialist | strategic | validation
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     last_fetched_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     last_error: Mapped[str | None] = mapped_column(Text)
@@ -46,6 +48,12 @@ class FeedItem(Base):
     canonical_url: Mapped[str] = mapped_column(Text, nullable=False)
     publisher: Mapped[str | None] = mapped_column(Text)
     summary: Mapped[str | None] = mapped_column(Text)
+    # Lead image declared by the feed or collected from the article page (see services/images.py for the policy).
+    image_url: Mapped[str | None] = mapped_column(Text)
+    image_width: Mapped[int | None] = mapped_column(Integer)
+    image_height: Mapped[int | None] = mapped_column(Integer)
+    image_source: Mapped[str | None] = mapped_column(String(16))  # feed_media | feed_img | og | jsonld | reddit
+    image_checked_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     published_at: Mapped[datetime | None] = mapped_column(UTCDateTime)
     fetched_at: Mapped[datetime] = mapped_column(UTCDateTime, nullable=False, default=utcnow)
     lang: Mapped[str | None] = mapped_column(String(8))

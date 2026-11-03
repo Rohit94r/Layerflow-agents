@@ -92,6 +92,8 @@ export interface Source {
   url: string;
   weight: number;
   region: Region | null;
+  group: string | null;
+  tier: string | null;
   active: boolean;
   last_fetched_at: string | null;
   last_error: string | null;
@@ -116,6 +118,10 @@ export interface FeedItem {
   canonical_url: string;
   publisher: string | null;
   summary: string | null;
+  image_url: string | null;
+  image_width: number | null;
+  image_height: number | null;
+  image_source: string | null;
   published_at: string | null;
   fetched_at: string | null;
   source: { id: string; name: string; kind: SourceKind } | null;
@@ -170,6 +176,7 @@ export interface ArticleSummary {
   category_label: string;
   state: ArticleState;
   slug: string | null;
+  cover_image_url: string | null;
   quality_score: number | null;
   revision_count: number;
   last_error: string | null;

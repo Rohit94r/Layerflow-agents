@@ -7,6 +7,7 @@ import math
 import re
 from datetime import datetime
 from functools import lru_cache
+from html import unescape
 from typing import Any
 from zoneinfo import ZoneInfo
 
@@ -33,6 +34,29 @@ def _env(templates_dir: str) -> Environment:
     )
 
 
+def _sanitize_jsonld(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: _sanitize_jsonld(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_sanitize_jsonld(v) for v in value]
+    if isinstance(value, str):
+        return value.replace("</", "<\\/").replace("<", "\\u003C").replace(">", "\\u003E").replace("&", "\\u0026")
+    return value
+
+
+def _render_safe_text(value: Any) -> str:
+    if value is None:
+        return ""
+    text = str(value)
+    text = re.sub(r"(?is)<(script|iframe|object|embed|svg|style|template|img)\b[^>]*>.*?</\1>", " ", text)
+    text = re.sub(r"(?is)<(script|iframe|object|embed|svg|style|template|img)\b[^>]*>", " ", text)
+    text = re.sub(r"(?is)<[^>]+>", " ", text)
+    text = re.sub(r"(?i)\s+on\w+\s*=\s*(?:\"[^\"]*\"|'[^']*'|[^\s>]+)", " ", text)
+    text = unescape(text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
 def render_context(
     payload: dict[str, Any], *, brand: dict[str, Any], published_at: datetime | None, timezone: str, spelling: str = "en-US"
 ) -> dict[str, Any]:
@@ -46,11 +70,11 @@ def render_context(
         spec = pb.section(s.get("key", ""))
         sections.append(
             {
-                "heading": s.get("heading") or (spec.heading if spec else ""),
+                "heading": _render_safe_text(s.get("heading") or (spec.heading if spec else "")),
                 "show_heading": spec.show_heading if spec else True,
-                "paragraphs": s.get("paragraphs") or [],
-                "bullets": s.get("bullets") or [],
-                "pull_quote": s.get("pull_quote"),
+                "paragraphs": [_render_safe_text(p) for p in (s.get("paragraphs") or [])],
+                "bullets": [_render_safe_text(b) for b in (s.get("bullets") or [])],
+                "pull_quote": _render_safe_text(s.get("pull_quote")),
             }
         )
     research_sources = {s.get("url"): s for s in payload.get("sources_meta") or []}
@@ -79,7 +103,7 @@ def render_context(
         },
         "og": {k: v for k, v in (seo.get("og") or {}).items()},
         "twitter": {k: v for k, v in (seo.get("twitter") or {}).items()},
-        "json_ld": seo.get("json_ld") or [],
+        "json_ld": [_sanitize_jsonld(block) for block in (seo.get("json_ld") or [])],
         "article": {
             "title": seo.get("h1") or art.get("title", ""),
             "dek": art.get("dek"),

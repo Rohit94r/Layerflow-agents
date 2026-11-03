@@ -22,6 +22,7 @@ from app.services import dedupe, scoring
 from app.services.entities import extract_entities, tag_region
 from app.services.feeds import FeedParseError, RawItem, parse_ir_html, parse_source
 from app.services.fetcher import FetchError
+from app.services.images import candidates_from_html, pick_image
 from app.services.prompts import compose_system, versions_tag
 from app.services.router_rules import route_category
 from app.services.text import looks_english, truncate_words
@@ -233,6 +234,11 @@ async def run_discovery(ctx: AgentContext, *, source_id: str | None = None) -> d
                 canonical_url=c["canonical"],
                 publisher=it.publisher or c["src"].name,
                 summary=truncate_words(it.summary, 600) if it.summary else None,
+                image_url=it.image_url,
+                image_width=it.image_width,
+                image_height=it.image_height,
+                image_source=it.image_source,
+                image_checked_at=now if it.image_url else None,
                 published_at=it.published_at,
                 fetched_at=now,
                 lang=(it.lang or "en")[:8],
@@ -308,6 +314,12 @@ async def run_discovery(ctx: AgentContext, *, source_id: str | None = None) -> d
     )
 
     enriched = await _enrich(ctx, head_ids[: int(dcfg.get("enrich_top_k", 12))]) if dcfg.get("llm_enrich", True) else 0
+    image_cfg = settings.get("images", {})
+    images_found = (
+        await _backfill_images(ctx, head_ids[: int(image_cfg.get("backfill_top_k", 25))])
+        if image_cfg.get("enabled", True)
+        else 0
+    )
 
     duration = int((time.perf_counter() - started) * 1000)
     summary = {
@@ -317,6 +329,7 @@ async def run_discovery(ctx: AgentContext, *, source_id: str | None = None) -> d
         "new_items": len(inserted),
         "unique_stories": len(head_ids),
         "enriched": enriched,
+        "images": images_found,
         "duration_ms": duration,
         **stats,
     }
@@ -375,3 +388,59 @@ async def _enrich(ctx: AgentContext, ids: list[uuid.UUID]) -> int:
     if done:
         await ctx.log(f"Classified {done} top stories with the fast model")
     return done
+
+
+async def _backfill_images(ctx: AgentContext, ids: list[uuid.UUID]) -> int:
+    """Collect the publisher's declared lead image for top stories whose feed carried none.
+
+    Bounded on purpose: only the highest-scoring new stories are fetched, one request per domain at a time
+    (the shared Fetcher enforces that), robots.txt is honoured and results are cached on disk. A miss is
+    recorded in ``image_checked_at`` so the same URL is not retried on every run.
+    """
+    if not ids:
+        return 0
+    settings = ctx.tenant.settings
+    cfg = settings.get("images", {})
+    retry_days = int(cfg.get("retry_days", 7))
+    cutoff = utcnow() - timedelta(days=retry_days)
+    async with session_factory()() as db:
+        rows = list((await db.execute(select(FeedItem).where(FeedItem.id.in_(ids)))).scalars().all())
+        pending = [
+            (row.id, row.url)
+            for row in rows
+            if not row.image_url and (row.image_checked_at is None or row.image_checked_at < cutoff)
+        ]
+    if not pending:
+        return 0
+
+    sem = asyncio.Semaphore(4)
+
+    async def fetch(fid: uuid.UUID, url: str) -> tuple[uuid.UUID, Any | None]:
+        async with sem:
+            try:
+                res = await ctx.fetcher.get(url, respect_robots=True, use_cache=True)
+                return fid, pick_image(candidates_from_html(res.text, res.final_url or url))
+            except FetchError:
+                return fid, None
+            except Exception:  # a single bad page must not fail the discovery run
+                log.debug("image backfill failed for %s", url, exc_info=True)
+                return fid, None
+
+    results = await asyncio.gather(*(fetch(fid, url) for fid, url in pending))
+    found = 0
+    async with session_factory()() as db:
+        for fid, candidate in results:
+            item = await db.get(FeedItem, fid)
+            if item is None:
+                continue
+            item.image_checked_at = utcnow()
+            if candidate is not None:
+                item.image_url = candidate.url
+                item.image_width = candidate.width
+                item.image_height = candidate.height
+                item.image_source = candidate.source
+                found += 1
+        await db.commit()
+    if found:
+        await ctx.log(f"Collected lead images for {found} of {len(pending)} stories")
+    return found

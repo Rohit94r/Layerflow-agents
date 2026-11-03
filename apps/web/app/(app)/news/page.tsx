@@ -42,6 +42,8 @@ function breakdownTitle(item: FeedItem): string {
   return `Score ${item.score.toFixed(2)}\n${parts.join("\n")}${signals.length ? `\nsignals: ${signals.join(", ")}` : ""}`;
 }
 
+// there you can add the properly harness things like nothing anyone  do out of the harness collection 
+
 function PromoteDialog({ item, onClose }: { item: FeedItem; onClose: () => void }) {
   const playbooks = usePlaybooks();
   const router = useRouter();
@@ -128,6 +130,33 @@ function IgnoreDialog({ item, onClose }: { item: FeedItem; onClose: () => void }
   );
 }
 
+function LeadImage({ item, className, alt = "" }: { item: FeedItem; className?: string; alt?: string }) {
+  const [broken, setBroken] = useState(false);
+  if (!item.image_url || broken) {
+    return (
+      <div
+        className={`flex items-center justify-center rounded border border-line bg-surface-2 ${className ?? ""}`}
+        aria-hidden
+      >
+        <span className="max-w-full truncate px-1 text-[9px] font-semibold tracking-wider text-muted uppercase">
+          {item.publisher ?? "TEN"}
+        </span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={item.image_url}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      onError={() => setBroken(true)}
+      className={`rounded border border-line bg-surface-2 object-cover ${className ?? ""}`}
+    />
+  );
+}
+
 function ItemDrawer({ id, onClose, canContent }: { id: string; onClose: () => void; canContent: boolean }) {
   const pbs = usePlaybookMap();
   const detail = useQuery({ queryKey: ["feedItem", id], queryFn: () => get<FeedDetail>(`/feed/${id}`) });
@@ -185,6 +214,7 @@ function ItemDrawer({ id, onClose, canContent }: { id: string; onClose: () => vo
             {item.suggested_category ? <CategoryChip label={pbs[item.suggested_category]?.label ?? item.suggested_category} color={pbs[item.suggested_category]?.color} /> : null}
             <Badge tone={item.status === "promoted" ? "ok" : item.status === "ignored" ? "neutral" : "accent"}>{item.status}</Badge>
           </div>
+          <LeadImage item={item} alt={item.title} className="aspect-[16/9] w-full" />
           {item.why_it_matters ? (
             <div className="rounded-md border-l-2 border-accent bg-accent-soft/50 px-3 py-2">
               <p className="text-[11px] font-semibold tracking-wider text-accent uppercase">Why it matters</p>
@@ -442,16 +472,21 @@ function NewsInner() {
                         className={it.article_id || !canContent ? "invisible" : ""}
                       />
                     </td>
-                    <td className={`${td} max-w-[560px]`}>
-                      <button type="button" onClick={() => setOpen(it.id)} className="text-left font-medium text-ink hover:text-accent">
-                        {it.title}
-                      </button>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
-                        <a href={it.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-accent">
-                          {it.publisher ?? hostOf(it.url)} <ExternalLink className="size-3" />
-                        </a>
-                        {it.cluster_size && it.cluster_size > 1 ? <Badge tone="info" title="Same story from other publishers (deduplicated)">×{it.cluster_size} sources</Badge> : null}
-                        {it.why_it_matters ? <span className="truncate italic">{it.why_it_matters}</span> : null}
+                    <td className={`${td} max-w-[700px]`}>
+                      <div className="flex items-start gap-3">
+                        <LeadImage item={it} className="h-12 w-20 shrink-0" />
+                        <div className="min-w-0">
+                          <button type="button" onClick={() => setOpen(it.id)} className="text-left font-medium text-ink hover:text-accent">
+                            {it.title}
+                          </button>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted">
+                            <a href={it.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-accent">
+                              {it.publisher ?? hostOf(it.url)} <ExternalLink className="size-3" />
+                            </a>
+                            {it.cluster_size && it.cluster_size > 1 ? <Badge tone="info" title="Same story from other publishers (deduplicated)">×{it.cluster_size} sources</Badge> : null}
+                            {it.why_it_matters ? <span className="truncate italic">{it.why_it_matters}</span> : null}
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className={`${td} whitespace-nowrap text-ink-2`} title={dateTime(it.published_at)}>

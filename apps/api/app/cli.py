@@ -23,10 +23,10 @@ import yaml
 from sqlalchemy import func, select
 
 from app.core.config import get_settings
-from app.core.db import dispose_engine, session_factory
+from app.core.db import dispose_engine, session_factory, utcnow
 from app.core.logging import configure_logging
 from app.core.security import hash_password
-from app.models import EvalCase, Source, Tenant, User
+from app.models import EvalCase, FeedItem, Source, Tenant, User
 from app.services.tenant_settings import deep_merge
 
 
@@ -59,34 +59,99 @@ async def ensure_tenant(slug: str | None = None) -> Tenant:
         return tenant
 
 
-async def seed_sources(tenant: Tenant) -> int:
+async def seed_sources(tenant: Tenant, *, sync: bool = False) -> int:
+    """Add sources from feeds.yaml; with ``sync`` also refresh catalog metadata and retire unlisted feeds.
+
+    ``sync`` never deletes a row and never touches counters/history — it only updates the fields the catalog
+    owns and sets ``active=false`` on sources that are no longer part of the curated list.
+    """
     path = get_settings().config_dir / "sources" / "feeds.yaml"
     if not path.exists():
         print("no feeds.yaml; skipping sources")
         return 0
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     added = 0
+    retired = 0
     async with session_factory()() as db:
-        existing = set((await db.execute(select(Source.url).where(Source.tenant_id == tenant.id))).scalars())
+        rows = list((await db.execute(select(Source).where(Source.tenant_id == tenant.id))).scalars())
+        by_url = {s.url: s for s in rows}
+        listed: set[str] = set()
         for src in data.get("sources", []):
             url = (src.get("url") or "").strip()
-            if not url or url in existing:
+            if not url:
                 continue
-            db.add(
-                Source(
-                    tenant_id=tenant.id,
-                    kind=src.get("kind", "rss"),
-                    name=src.get("name", url)[:200],
-                    url=url,
-                    weight=float(src.get("weight", 1.0)),
-                    region=src.get("region"),
-                    active=bool(src.get("active", True)),
-                )
-            )
-            existing.add(url)
-            added += 1
+            listed.add(url)
+            values = {
+                "kind": src.get("kind", "rss"),
+                "name": (src.get("name") or url)[:200],
+                "weight": float(src.get("weight", 1.0)),
+                "region": src.get("region"),
+                "group": src.get("group"),
+                "tier": src.get("tier"),
+                "active": bool(src.get("active", True)),
+            }
+            row = by_url.get(url)
+            if row is None:
+                db.add(Source(tenant_id=tenant.id, url=url, **values))
+                added += 1
+            elif sync:
+                for key, value in values.items():
+                    setattr(row, key, value)
+        if sync:
+            for url, row in by_url.items():
+                if url not in listed and row.active:
+                    row.active = False
+                    retired += 1
         await db.commit()
+    if sync:
+        print(f"sources synced: {added} added, {retired} retired (kept, inactive)")
     return added
+
+
+async def backfill_images(limit: int = 200, *, refresh: bool = False) -> None:
+    """Fetch the publisher's lead image for stories already in the database (one-off backfill)."""
+    from app.services.fetcher import Fetcher
+    from app.services.images import candidates_from_html, pick_image
+
+    tenant = await ensure_tenant()
+    async with session_factory()() as db:
+        q = select(FeedItem).where(FeedItem.tenant_id == tenant.id)
+        if not refresh:
+            q = q.where(FeedItem.image_url.is_(None))
+        q = q.order_by(FeedItem.score.desc(), FeedItem.fetched_at.desc()).limit(limit)
+        rows = [(row.id, row.url) for row in (await db.execute(q)).scalars().all()]
+    if not rows:
+        print("no stories need an image")
+        return
+
+    sem = asyncio.Semaphore(4)
+
+    found = 0
+    async with Fetcher() as fetcher:
+
+        async def fetch(fid, url):
+            async with sem:
+                try:
+                    res = await fetcher.get(url, respect_robots=True, use_cache=True)
+                    return fid, pick_image(candidates_from_html(res.text, res.final_url or url))
+                except Exception:
+                    return fid, None
+
+        results = await asyncio.gather(*(fetch(fid, url) for fid, url in rows))
+    async with session_factory()() as db:
+        for fid, candidate in results:
+            item = await db.get(FeedItem, fid)
+            if item is None:
+                continue
+            item.image_checked_at = utcnow()
+            if candidate is not None:
+                item.image_url = candidate.url
+                item.image_width = candidate.width
+                item.image_height = candidate.height
+                item.image_source = candidate.source
+                found += 1
+        await db.commit()
+    print(f"images found: {found} / {len(rows)} stories")
 
 
 async def seed_eval_cases(tenant: Tenant) -> int:
@@ -231,8 +296,9 @@ async def drain() -> None:
 
 
 def migrate() -> None:
-    from alembic import command
     from alembic.config import Config
+
+    from alembic import command
 
     cfg = Config(str(Path(__file__).resolve().parents[1] / "alembic.ini"))
     cfg.set_main_option("script_location", str(Path(__file__).resolve().parents[1] / "alembic"))
@@ -244,9 +310,17 @@ def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="python -m app.cli", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("bootstrap")
+<<<<<<< Updated upstream
     sub.add_parser("seed-sources")
     rc = sub.add_parser("reset-content")
     rc.add_argument("--yes", action="store_true", help="required: confirm the destructive reset")
+=======
+    ss = sub.add_parser("seed-sources")
+    ss.add_argument("--sync", action="store_true", help="refresh catalog metadata and retire feeds no longer in feeds.yaml")
+    bi = sub.add_parser("backfill-images")
+    bi.add_argument("--limit", type=int, default=200)
+    bi.add_argument("--refresh", action="store_true", help="also refresh stories that already have an image")
+>>>>>>> Stashed changes
     sub.add_parser("drain")
     sub.add_parser("migrate")
     ca = sub.add_parser("create-admin")
@@ -264,6 +338,7 @@ def main(argv: list[str] | None = None) -> None:
             if args.cmd == "bootstrap":
                 await bootstrap()
             elif args.cmd == "seed-sources":
+<<<<<<< Updated upstream
                 print(f"sources added: {await seed_sources(await ensure_tenant())}")
             elif args.cmd == "reset-content":
                 if not args.yes:
@@ -271,6 +346,11 @@ def main(argv: list[str] | None = None) -> None:
                 deleted = await reset_content()
                 print(json.dumps({k: v for k, v in deleted.items() if v}, indent=2))
                 print("content cleared; tenant, users, sources and eval cases kept")
+=======
+                print(f"sources added: {await seed_sources(await ensure_tenant(), sync=args.sync)}")
+            elif args.cmd == "backfill-images":
+                await backfill_images(args.limit, refresh=args.refresh)
+>>>>>>> Stashed changes
             elif args.cmd == "create-admin":
                 tenant = await ensure_tenant()
                 print(f"{args.email}: {await create_user(tenant, args.email, args.password, name=args.name, role=args.role)}")

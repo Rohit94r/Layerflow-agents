@@ -69,6 +69,7 @@ class OllamaProvider:
             latency_ms=latency,
             raw={k: data.get(k) for k in ("total_duration", "load_duration", "eval_duration", "done_reason")},
         )
+       
 
     async def embed(self, *, model: str, texts: list[str]) -> list[list[float]]:
         try:

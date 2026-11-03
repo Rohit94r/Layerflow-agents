@@ -1,374 +1,402 @@
 # LayerFlow discovery sources — The Executive Narrative (tenant: ten)
 #
-# Every source here is keyless (plan §2.1 tier A, or tier B where marked).
-# Seeded into the `sources` table on bootstrap; editable afterwards from
-# Settings → Sources. Sources already present (matched by URL) are left as-is.
+# Curated platform list, organised by what TEN uses each source for rather than
+# by geography alone. Seeded into the `sources` table on bootstrap; editable
+# afterwards from Settings → Sources. `python -m app.cli seed-sources --sync`
+# refreshes catalog metadata and retires (never deletes) feeds no longer listed.
 #
 # Fields
 #   kind    rss | gdelt | edgar | ir | hn | reddit
 #   weight  0.3–1.5 source-quality weight used by the discovery score (plan §5 A1)
 #   region  global | us | eu | uk | india | mena | apac | africa | latam
+#   group   catalog group shown in Settings → Sources
+#   tier    primary_daily | regional | specialist | strategic | validation
 #   active  false = kept for reference but not fetched
 #
-# Lines marked `# verify` are feeds whose URL was not confirmed at the time of
-# writing. They ship inactive; test them from Settings → Sources → Test and
-# switch them on if they return items.
+# Coverage notes
+#   * Reuters, Bloomberg and most consultancies retired public RSS years ago.
+#     Their entries use Google News' keyless, site-scoped RSS (still linking to
+#     the publisher's own article); the unwrapper resolves the redirect and the
+#     discovery backfill fetches the publisher page for the lead image.
+#   * The Gulf Intelligence appears twice in the brief (#33 and #47) and is kept
+#     once. Vodafone Qatar and The Gulf Intelligence currently expose no usable
+#     keyless news feed, so they ship inactive until a feed is supplied.
+#   * Feeds/APIs are published for syndication and fetched as such. Article pages
+#     reached from them are fetched only by discovery's bounded image backfill
+#     and the research agent, both of which honour robots.txt and rate limits.
 #
-# Compliance (plan §10.4): feeds and APIs are published for syndication and are
-# fetched as such. Article pages reached from them are fetched only by the
-# research agent, which honours robots.txt and rate limits.
+# Image policy: see apps/api/app/services/images.py. Only real publisher
+# photography is accepted — landscape rasters (jpg/jpeg/png/webp/avif), never
+# logos, icons, sprites, favicons, placeholders, tracking pixels or svg/gif.
 
-version: 1
+version: 2
 sources:
 
-  # ── Global business press ────────────────────────────────────────────────
-  - name: BBC Business
+  # ── 1. Global business, markets & breaking news ───────────
+  # M&A, capital allocation, corporate strategy, markets, major company moves.
+  - name: Reuters
     kind: rss
-    url: https://feeds.bbci.co.uk/news/business/rss.xml
+    url: "https://news.google.com/rss/search?q=site:reuters.com+(business+OR+markets+OR+deal)+when:1d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.4
+    region: global
+    group: global_business
+    tier: primary_daily
+  - name: Bloomberg
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:bloomberg.com+(markets+OR+business)+when:1d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.4
+    region: global
+    group: global_business
+    tier: primary_daily
+  - name: CNBC
+    kind: rss
+    url: "https://www.cnbc.com/id/100003114/device/rss/rss.html"
     weight: 1.2
-    region: uk
-    active: true
-
-  - name: The Guardian — Business
+    region: us
+    group: global_business
+    tier: primary_daily
+  - name: Financial Times
     kind: rss
-    url: https://www.theguardian.com/uk/business/rss
+    url: "https://www.ft.com/rss/home"
+    weight: 1.3
+    region: uk
+    group: global_business
+    tier: primary_daily
+  - name: The Wall Street Journal
+    kind: rss
+    url: "https://feeds.a.dj.com/rss/RSSMarketsMain.xml"
+    weight: 1.3
+    region: us
+    group: global_business
+    tier: primary_daily
+
+  # ── 2. Executive strategy & management ───────────────────
+  # Corporate transformation, executive decisions, industry outlooks.
+  - name: McKinsey & Company
+    kind: rss
+    url: "https://www.mckinsey.com/insights/rss"
+    weight: 1.15
+    region: global
+    group: strategy
+    tier: strategic
+  - name: Boston Consulting Group
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:bcg.com+(insights+OR+report+OR+article)+when:7d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: global
+    group: strategy
+    tier: strategic
+  - name: Bain & Company
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:bain.com+insights+when:7d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: global
+    group: strategy
+    tier: strategic
+  - name: PwC
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:pwc.com+(insights+OR+research)+when:7d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: global
+    group: strategy
+    tier: strategic
+  - name: Deloitte
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:deloitte.com+insights+when:7d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: global
+    group: strategy
+    tier: strategic
+  - name: EY
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:ey.com+(insights+OR+report)+when:7d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: global
+    group: strategy
+    tier: strategic
+  - name: KPMG
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:kpmg.com+(insights+OR+report)+when:7d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: global
+    group: strategy
+    tier: strategic
+  - name: S&P Global
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:spglobal.com+(research+OR+markets)+when:7d&hl=en-US&gl=US&ceid=US:en"
     weight: 1.1
-    region: uk
-    active: true
-
-  - name: New York Times — Business
-    kind: rss
-    url: https://rss.nytimes.com/services/xml/rss/nyt/Business.xml
-    weight: 1.3
-    region: us
-    active: true
-
-  - name: New York Times — DealBook
-    kind: rss
-    url: https://rss.nytimes.com/services/xml/rss/nyt/Dealbook.xml
-    weight: 1.3
-    region: us
-    active: true
-
-  - name: Wall Street Journal — Markets
-    kind: rss
-    url: https://feeds.a.dj.com/rss/RSSMarketsMain.xml
-    weight: 1.3
-    region: us
-    active: true
-
-  - name: Wall Street Journal — US Business
-    kind: rss
-    url: https://feeds.a.dj.com/rss/WSJcomUSBusiness.xml
-    weight: 1.3
-    region: us
-    active: true
-
-  - name: MarketWatch — Top Stories
-    kind: rss
-    url: https://feeds.content.dowjones.io/public/rss/mw_topstories
-    weight: 1.0
-    region: us
-    active: true
-
-  - name: CNBC — Business News
-    kind: rss
-    url: https://www.cnbc.com/id/10001147/device/rss/rss.html
-    weight: 1.0
-    region: us
-    active: true
-
-  - name: CNBC — Top News
-    kind: rss
-    url: https://www.cnbc.com/id/100003114/device/rss/rss.html
-    weight: 0.9
-    region: us
-    active: true
-
-  - name: Financial Times — Home
-    kind: rss
-    url: https://www.ft.com/rss/home
-    weight: 1.3          # headlines are free; most article pages are paywalled, so research skips them
     region: global
-    active: true
+    group: strategy
+    tier: strategic
 
-  - name: The Economist — Business
+  # ── 3. India — business, corporate & markets ─────────────
+  # Indian companies, IPOs, M&A, investments, banking, infrastructure.
+  - name: Economic Times
     kind: rss
-    url: https://www.economist.com/business/rss.xml
-    weight: 1.3
-    region: global
-    active: true
-
-  - name: Fortune
+    url: "https://economictimes.indiatimes.com/rssfeedstopstories.cms"
+    weight: 1.1
+    region: india
+    group: india
+    tier: regional
+  - name: Business Standard
     kind: rss
-    url: https://fortune.com/feed/
+    url: "https://news.google.com/rss/search?q=site:business-standard.com+(companies+OR+markets)+when:1d&hl=en-IN&gl=IN&ceid=IN:en"
+    weight: 1.1
+    region: india
+    group: india
+    tier: regional
+  - name: Mint
+    kind: rss
+    url: "https://www.livemint.com/rss/companies"
+    weight: 1.1
+    region: india
+    group: india
+    tier: regional
+  - name: The Hindu BusinessLine
+    kind: rss
+    url: "https://www.thehindubusinessline.com/feeder/default.rss"
     weight: 1.0
-    region: us
-    active: true
-
-  - name: Yahoo Finance — News
+    region: india
+    group: india
+    tier: regional
+  - name: Moneycontrol
     kind: rss
-    url: https://finance.yahoo.com/news/rssindex
-    weight: 0.8
-    region: us
-    active: true
+    url: "https://news.google.com/rss/search?q=site:moneycontrol.com+(business+OR+markets)+when:1d&hl=en-IN&gl=IN&ceid=IN:en"
+    weight: 1.0
+    region: india
+    group: india
+    tier: regional
 
-  - name: Al Jazeera — All News
+  # ── 4. Automotive & mobility ─────────────────────────────
+  # OEM strategy, localisation, manufacturing, EVs, supply chains.
+  - name: Autocar Professional
     kind: rss
-    url: https://www.aljazeera.com/xml/rss/all.xml
+    url: "https://news.google.com/rss/search?q=site:autocarpro.in+(auto+OR+EV+OR+manufacturing)+when:7d&hl=en-IN&gl=IN&ceid=IN:en"
+    weight: 1.0
+    region: india
+    group: automotive
+    tier: specialist
+  - name: Škoda Auto Volkswagen India
+    kind: rss
+    url: "https://skoda-vw.co.in/feed/"
+    weight: 1.0
+    region: india
+    group: automotive
+    tier: specialist
+
+  # ── 5. GCC / Middle East — business & investment ─────────
+  # Sovereign capital, M&A, infrastructure, energy, business expansion.
+  - name: The National
+    kind: rss
+    url: "https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml"
+    weight: 1.2
+    region: mena
+    group: gcc_business
+    tier: regional
+  - name: Zawya
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:zawya.com+(business+OR+investment)+when:2d&hl=en-AE&gl=AE&ceid=AE:en"
+    weight: 1.1
+    region: mena
+    group: gcc_business
+    tier: regional
+  - name: Arab News
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:arabnews.com+(business+OR+economy)+when:1d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: mena
+    group: gcc_business
+    tier: regional
+  - name: Gulf Times
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:gulf-times.com+(business+OR+economy)+when:2d&hl=en-AE&gl=AE&ceid=AE:en"
+    weight: 1.0
+    region: mena
+    group: gcc_business
+    tier: regional
+  - name: Gulf News
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:gulfnews.com+(business+OR+economy)+when:1d&hl=en-AE&gl=AE&ceid=AE:en"
+    weight: 1.0
+    region: mena
+    group: gcc_business
+    tier: regional
+  - name: Khaleej Times
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:khaleejtimes.com+(business+OR+economy)+when:1d&hl=en-AE&gl=AE&ceid=AE:en"
+    weight: 1.0
+    region: mena
+    group: gcc_business
+    tier: regional
+  - name: Arabian Business
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:arabianbusiness.com+business+when:2d&hl=en-AE&gl=AE&ceid=AE:en"
+    weight: 1.0
+    region: mena
+    group: gcc_business
+    tier: regional
+  - name: GCC Business News
+    kind: rss
+    url: "https://www.gccbusinessnews.com/feed/"
+    weight: 1.0
+    region: mena
+    group: gcc_business
+    tier: regional
+
+  # ── 6. GCC — official / primary sources (validation) ─────
+  # Government/company announcements, official investment figures.
+  - name: WAM — Emirates News Agency
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:wam.ae+(business+OR+investment)+when:2d&hl=en-AE&gl=AE&ceid=AE:en"
+    weight: 1.5
+    region: mena
+    group: gcc_official
+    tier: validation
+  - name: QNA — Qatar News Agency
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:qna.org.qa+(business+OR+investment)+when:7d&hl=en-AE&gl=AE&ceid=AE:en"
+    weight: 1.5
+    region: mena
+    group: gcc_official
+    tier: validation
+
+  # ── 7. Energy, infrastructure & mega-projects ────────────
+  # Energy, power, construction, utilities, transport, regional investment.
+  - name: MEED
+    kind: rss
+    url: "https://www.meed.com/sector/construction/rss"
+    weight: 1.1
+    region: mena
+    group: energy_infra
+    tier: specialist
+  - name: MEP Middle East
+    kind: rss
+    url: "https://news.google.com/rss/search?q=site:mepmiddleeast.com+(project+OR+contract+OR+MEP)+when:7d&hl=en-AE&gl=AE&ceid=AE:en"
     weight: 0.9
     region: mena
-    active: true
-
-  - name: Bloomberg — Markets
+    group: energy_infra
+    tier: specialist
+  - name: BNamericas
     kind: rss
-    url: https://feeds.bloomberg.com/markets/news.rss   # verify
-    weight: 1.3
-    region: global
-    active: false
+    url: "https://news.google.com/rss/search?q=site:bnamericas.com+(business+OR+investment)+when:2d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: latam
+    group: energy_infra
+    tier: regional
 
-  - name: Business Insider — All
+  # ── 8. Africa — business & capital ───────────────────────
+  # Banking, M&A, infrastructure, telecom, investment, expansion.
+  - name: BusinessDay
     kind: rss
-    url: https://feeds.businessinsider.com/custom/all   # verify
-    weight: 0.7
-    region: us
-    active: false
+    url: "https://businessday.ng/feed/"
+    weight: 1.0
+    region: africa
+    group: africa
+    tier: regional
 
-  - name: Forbes — Business
+  # ── 9. China / Asia — business & industry ────────────────
+  # Chinese companies, manufacturing, batteries, robotics, capital markets.
+  - name: Caixin Global
     kind: rss
-    url: https://www.forbes.com/business/feed/   # verify
-    weight: 0.8
-    region: us
-    active: false
+    url: "https://news.google.com/rss/search?q=site:caixinglobal.com+(business+OR+economy)+when:2d&hl=en-US&gl=US&ceid=US:en"
+    weight: 1.0
+    region: apac
+    group: china_asia
+    tier: regional
 
-  # ── Management & strategy ────────────────────────────────────────────────
-  - name: Harvard Business Review
-    kind: rss
-    url: http://feeds.hbr.org/harvardbusiness
-    weight: 1.2
-    region: global
-    active: true
-
-  - name: MIT Sloan Management Review
-    kind: rss
-    url: https://sloanreview.mit.edu/feed/
-    weight: 1.2
-    region: global
-    active: true
-
-  - name: McKinsey — Insights
-    kind: rss
-    url: https://www.mckinsey.com/insights/rss   # verify
-    weight: 1.1
-    region: global
-    active: false
-
-  - name: Fast Company — Latest
-    kind: rss
-    url: https://www.fastcompany.com/latest/rss   # verify
-    weight: 0.8
-    region: us
-    active: false
-
-  # ── Technology & startups ────────────────────────────────────────────────
+  # ── 10. AI, technology & digital transformation ──────────
+  # Enterprise AI, emerging technology, technology strategy.
   - name: TechCrunch
     kind: rss
-    url: https://techcrunch.com/feed/
+    url: "https://techcrunch.com/feed/"
     weight: 1.0
     region: global
-    active: true
-
-  - name: Crunchbase News
+    group: ai_tech
+    tier: specialist
+  - name: Fast Company
     kind: rss
-    url: https://news.crunchbase.com/feed/
-    weight: 1.0
-    region: global
-    active: true
-
-  - name: The Verge
-    kind: rss
-    url: https://www.theverge.com/rss/index.xml
-    weight: 0.7
-    region: us
-    active: true
-
-  - name: Ars Technica
-    kind: rss
-    url: https://feeds.arstechnica.com/arstechnica/index
-    weight: 0.7
-    region: us
-    active: true
-
-  # ── India ────────────────────────────────────────────────────────────────
-  - name: Economic Times — Top Stories
-    kind: rss
-    url: https://economictimes.indiatimes.com/rssfeedstopstories.cms
-    weight: 1.0
-    region: india
-    active: true
-
-  - name: Economic Times — Markets
-    kind: rss
-    url: https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms
-    weight: 1.0
-    region: india
-    active: true
-
-  - name: Mint — Companies
-    kind: rss
-    url: https://www.livemint.com/rss/companies
-    weight: 1.0
-    region: india
-    active: true
-
-  - name: Moneycontrol — Business
-    kind: rss
-    url: https://www.moneycontrol.com/rss/business.xml
+    url: "https://www.fastcompany.com/latest/rss"
     weight: 0.9
-    region: india
-    active: true
+    region: us
+    group: ai_tech
+    tier: specialist
 
-  - name: Inc42
+  # ── 11. AI infrastructure & data centres ─────────────────
+  # Data centres, GPU infrastructure, cooling, power demand, hyperscalers.
+  - name: Data Center Dynamics
     kind: rss
-    url: https://inc42.com/feed/
-    weight: 0.9
-    region: india
-    active: true
-
-  - name: YourStory
+    url: "https://www.datacenterdynamics.com/en/rss/"
+    weight: 1.1
+    region: global
+    group: ai_infra
+    tier: specialist
+  - name: Data Center Knowledge
     kind: rss
-    url: https://yourstory.com/feed
-    weight: 0.8
-    region: india
-    active: true
-
-  - name: Business Standard — Companies
-    kind: rss
-    url: https://www.business-standard.com/rss/companies-101.rss   # verify
+    url: "https://www.datacenterknowledge.com/rss.xml"
     weight: 1.0
-    region: india
-    active: false
+    region: us
+    group: ai_infra
+    tier: specialist
 
-  - name: Hindu BusinessLine
+  # ── 12. Telecom & digital infrastructure ─────────────────
+  # Network investment, connectivity, towers, subsea, digital assets.
+  - name: Light Reading
     kind: rss
-    url: https://www.thehindubusinessline.com/feeder/default.rss   # verify
-    weight: 0.9
-    region: india
-    active: false
-
-  # ── Company newsrooms / investor relations (primary sources) ─────────────
-  - name: Microsoft — News Center
+    url: "https://www.lightreading.com/rss.xml"
+    weight: 1.0
+    region: global
+    group: telecom
+    tier: specialist
+  - name: Capacity Media
+    kind: rss
+    url: "https://www.capacitymedia.com/rss"
+    weight: 1.0
+    region: global
+    group: telecom
+    tier: specialist
+  - name: Vodafone Qatar
     kind: ir
-    url: https://news.microsoft.com/feed/
-    weight: 1.2
-    region: us
-    active: true
+    url: "https://www.vodafone.qa/en/about-us/media/press-release"
+    weight: 0.8
+    region: mena
+    group: telecom
+    tier: specialist
+    active: false   # no keyless news feed; enable once a press-release feed is supplied
 
-  - name: NVIDIA — Newsroom Releases
+  # ── 13. Semiconductors & advanced technology ─────────────
+  # Chips, manufacturing, advanced packaging, AI compute, hardware bottlenecks.
+  - name: Semiconductor Engineering
+    kind: rss
+    url: "https://semiengineering.com/feed/"
+    weight: 1.1
+    region: global
+    group: semiconductors
+    tier: specialist
+
+  # ── 14. Space / deeptech / emerging infrastructure ───────
+  # Space infrastructure, satellite businesses, strategic investment.
+  - name: Loft Orbital
+    kind: rss
+    url: "https://loftorbital.com/feed/"
+    weight: 1.0
+    region: global
+    group: space_deeptech
+    tier: specialist
+  - name: Le Monde
+    kind: rss
+    url: "https://www.lemonde.fr/rss/une.xml"
+    weight: 0.7
+    region: eu
+    group: space_deeptech
+    tier: specialist
+
+  # ── 15. Regional / specialist business intelligence ──────
+  # Energy markets and GCC strategic developments (listed twice in the brief).
+  - name: The Gulf Intelligence
     kind: ir
-    url: https://nvidianews.nvidia.com/releases.xml
-    weight: 1.2
-    region: us
-    active: true
-
-  - name: Apple — Newsroom
-    kind: ir
-    url: https://www.apple.com/newsroom/rss-feed.rss
-    weight: 1.2
-    region: us
-    active: true
-
-  # ── Query feeds (tier B: keyless but rate-limited; cached with backoff) ──
-  - name: Google News — M&A (24h)
-    kind: rss
-    url: "https://news.google.com/rss/search?q=acquisition+OR+merger+when:1d&hl=en-US&gl=US&ceid=US:en"
+    url: "https://www.thegulfintelligence.com/en/media-center"
     weight: 0.8
-    region: global
-    active: true
-
-  - name: Google News — Funding rounds (24h)
-    kind: rss
-    url: "https://news.google.com/rss/search?q=%22funding+round%22+OR+%22raises%22+%22Series%22+when:1d&hl=en-US&gl=US&ceid=US:en"
-    weight: 0.8
-    region: global
-    active: true
-
-  - name: Google News — India business (24h)
-    kind: rss
-    url: "https://news.google.com/rss/search?q=india+business+OR+company+OR+deal+when:1d&hl=en-IN&gl=IN&ceid=IN:en"
-    weight: 0.8
-    region: india
-    active: true
-
-  - name: Google News — CEO appointments (24h)
-    kind: rss
-    url: "https://news.google.com/rss/search?q=%22appoints%22+%22chief+executive%22+OR+%22names+CEO%22+when:1d&hl=en-US&gl=US&ceid=US:en"
-    weight: 0.8
-    region: global
-    active: true
-
-  - name: Bing News — Capex & new plants
-    kind: rss
-    url: "https://www.bing.com/news/search?q=capex+OR+%22new+plant%22+OR+%22factory+investment%22&format=rss"
-    weight: 0.7
-    region: global
-    active: true
-
-  - name: Bing News — Quarterly earnings
-    kind: rss
-    url: "https://www.bing.com/news/search?q=%22quarterly+results%22+OR+%22quarterly+earnings%22&format=rss"
-    weight: 0.7
-    region: global
-    active: true
-
-  # ── GDELT 2.0 DOC API (tier A, keyless) ──────────────────────────────────
-  - name: GDELT — Deals & funding (English, 24h)
-    kind: gdelt
-    url: "https://api.gdeltproject.org/api/v2/doc/doc?query=(merger%20OR%20acquisition%20OR%20%22funding%20round%22)%20sourcelang:english&mode=artlist&format=json&maxrecords=75&timespan=24h&sort=datedesc"
-    weight: 0.7
-    region: global
-    active: true
-
-  - name: GDELT — India corporate (English, 24h)
-    kind: gdelt
-    url: "https://api.gdeltproject.org/api/v2/doc/doc?query=(acquisition%20OR%20investment%20OR%20IPO)%20sourcecountry:india%20sourcelang:english&mode=artlist&format=json&maxrecords=75&timespan=24h&sort=datedesc"
-    weight: 0.7
-    region: india
-    active: true
-
-  # ── SEC EDGAR (primary filings; requires a descriptive User-Agent) ───────
-  - name: SEC EDGAR — Latest 8-K filings
-    kind: edgar
-    url: "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start=0&count=40&output=atom"
-    weight: 1.5
-    region: us
-    active: true
-
-  # ── Community signal (low weight; early trends, never sole evidence) ─────
-  - name: Hacker News — Popular stories
-    kind: hn
-    url: "https://hn.algolia.com/api/v1/search_by_date?tags=story&numericFilters=points>40"
-    weight: 0.6
-    region: global
-    active: true
-
-  - name: Reddit — r/business (top, 24h)
-    kind: reddit
-    url: https://www.reddit.com/r/business/top.json?t=day&limit=25
-    weight: 0.4
-    region: global
-    active: true
-
-  - name: Reddit — r/economics (top, 24h)
-    kind: reddit
-    url: https://www.reddit.com/r/economics/top.json?t=day&limit=25
-    weight: 0.4
-    region: global
-    active: true
-
-  - name: Reddit — r/startups (top, 24h)
-    kind: reddit
-    url: https://www.reddit.com/r/startups/top.json?t=day&limit=25
-    weight: 0.4
-    region: global
-    active: true
+    region: mena
+    group: regional_intel
+    tier: strategic
+    active: false   # no news feed and not indexed by Google News; enable once supplied

@@ -85,6 +85,7 @@ async def run_seo(ctx: AgentContext, article_id: uuid.UUID, *, instruction: str 
         art = payload.get("article")
         if not art:
             raise PermanentError("Nothing to optimise yet; run Write first")
+        cover_image_url = article.cover_image_url
         inventory, taken_slugs, taken_titles = await _inventory(db, ctx.tenant.id, article_id)
         system, used = await compose_system(db, ctx.tenant.id, agent="seo", include_persona=False, include_style=False)
         previous_seo = payload.get("seo") or {}
@@ -183,7 +184,7 @@ async def run_seo(ctx: AgentContext, article_id: uuid.UUID, *, instruction: str 
         for u in art.get("sources_used") or []
         if u.startswith("http")
     ]
-    image = brand.get("og_image_url") or brand.get("logo_url")
+    image = cover_image_url or brand.get("og_image_url") or brand.get("logo_url")
     og = {
         "title": title_tag,
         "description": meta,

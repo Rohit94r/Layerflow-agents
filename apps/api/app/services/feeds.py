@@ -14,6 +14,7 @@ import feedparser
 from dateutil import parser as dateparser
 
 from app.services.canonical import canonicalize, publisher_from_url, unwrap
+from app.services.images import ImageCandidate, candidates_from_feed_entry, pick_image
 from app.services.text import normalize_space, truncate_words
 
 _TAG_RE = re.compile(r"<[^>]+>")
@@ -31,6 +32,10 @@ class RawItem:
     published_at: datetime | None = None
     publisher: str | None = None
     lang: str | None = None
+    image_url: str | None = None
+    image_width: int | None = None
+    image_height: int | None = None
+    image_source: str | None = None
     extra: dict | None = None
 
     @property
@@ -87,6 +92,7 @@ def parse_rss(text: str) -> list[RawItem]:
         summary = strip_html(e.get("summary") or e.get("description") or "")
         if summary.startswith(title):
             summary = summary[len(title) :].strip(" -–—")
+        image = pick_image(candidates_from_feed_entry(e))
         items.append(
             RawItem(
                 title=title,
@@ -95,6 +101,10 @@ def parse_rss(text: str) -> list[RawItem]:
                 published_at=_dt_from_struct(e.get("published_parsed") or e.get("updated_parsed")),
                 publisher=publisher or feed_title or publisher_from_url(link),
                 lang=(e.get("language") or parsed.feed.get("language") or None) if parsed.get("feed") else None,
+                image_url=image.url if image else None,
+                image_width=image.width if image else None,
+                image_height=image.height if image else None,
+                image_source=("feed" if image and image.source.startswith("feed") else image.source) if image else None,
             )
         )
     if not items and parsed.bozo:
@@ -128,6 +138,8 @@ def parse_gdelt(text: str) -> list[RawItem]:
                 published_at=published,
                 publisher=a.get("domain") or publisher_from_url(url),
                 lang="en" if lang in ("english", "en") else (lang[:8] or None),
+                image_url=a.get("socialimage") or None,
+                image_source="social" if a.get("socialimage") else None,
                 extra={"sourcecountry": a.get("sourcecountry")},
             )
         )
@@ -176,6 +188,7 @@ def parse_reddit(text: str) -> list[RawItem]:
         if not title or not url:
             continue
         created = d.get("created_utc")
+        image = _reddit_image(d)
         items.append(
             RawItem(
                 title=title,
@@ -183,10 +196,33 @@ def parse_reddit(text: str) -> list[RawItem]:
                 summary=truncate_words(strip_html(d.get("selftext") or ""), 400),
                 published_at=datetime.fromtimestamp(created, UTC) if created else None,
                 publisher=f"r/{d.get('subreddit')}" if d.get("is_self") else publisher_from_url(url),
+                image_url=image.url if image else None,
+                image_width=image.width if image else None,
+                image_height=image.height if image else None,
+                image_source="social" if image else None,
                 extra={"score": d.get("score"), "subreddit": d.get("subreddit"), "permalink": permalink},
             )
         )
     return items
+
+
+def _reddit_image(d: dict) -> ImageCandidate | None:
+    candidates: list[ImageCandidate] = []
+    for preview in (d.get("preview") or {}).get("images") or []:
+        source = preview.get("source") or {}
+        if source.get("url"):
+            candidates.append(
+                ImageCandidate(
+                    url=str(source["url"]),
+                    width=int(source["width"]) if str(source.get("width", "")).isdigit() else None,
+                    height=int(source["height"]) if str(source.get("height", "")).isdigit() else None,
+                    source="social",
+                )
+            )
+    thumb = d.get("thumbnail")
+    if isinstance(thumb, str) and thumb.startswith(("http://", "https://")):
+        candidates.append(ImageCandidate(url=thumb, source="social"))
+    return pick_image(candidates)
 
 
 def parse_source(kind: str, text: str) -> list[RawItem]:
