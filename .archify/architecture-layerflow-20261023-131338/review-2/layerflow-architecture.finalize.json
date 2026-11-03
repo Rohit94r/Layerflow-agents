@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "ok": false,
+  "command": "finalize",
+  "status": "fail",
+  "type": "architecture",
+  "quality": "showcase",
+  "startedAt": "2026-10-23T07:48:40.311Z",
+  "specification": {
+    "path": "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/candidate.json",
+    "sha256": "bdf569341111930130ac97f50d96ddf0888ee088ebf266cd7d7f1308db30e4c5",
+    "bytes": 11022
+  },
+  "artifact": {
+    "path": "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/layerflow-architecture.html",
+    "sha256": "552e96cf8f1b382ae1387507b4874763bdd66c0c3442253066c9498679f2b961",
+    "bytes": 840847
+  },
+  "stages": {
+    "validate": {
+      "status": "fail",
+      "exitCode": 1,
+      "durationMs": null,
+      "command": [
+        "/opt/homebrew/Cellar/node/26.10.0_1/bin/node",
+        "/Users/rohitjadhav/.agents/skills/archify/bin/archify.mjs",
+        "deliver",
+        "architecture",
+        "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/candidate.json",
+        "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/layerflow-architecture.html",
+        "--quality",
+        "showcase",
+        "--repo-root",
+        "/Users/rohitjadhav/projects/Layerflow-agents",
+        "--json"
+      ],
+      "receipt": {
+        "schemaVersion": 1,
+        "ok": false,
+        "command": "deliver",
+        "receiptId": "c88baf79-ad1b-438f-a160-5cb71174a9a9",
+        "stage": "render",
+        "type": "architecture",
+        "input": "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/candidate.json",
+        "output": "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/layerflow-architecture.html",
+        "error": "Architecture layout validation failed:\n- [clean-flow/endpoint-side-direction] architecture connections[10] id \"agents-provider\" \"agents\" -> \"provider\" final segment 2 [119, 410] -> [99, 640] does not honor toSide \"top\" — it must run vertical downward from above; keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments.",
+        "diagnostics": [
+          {
+            "code": "clean-flow/endpoint-side-direction",
+            "severity": "error",
+            "message": "[clean-flow/endpoint-side-direction] architecture connections[10] id \"agents-provider\" \"agents\" -> \"provider\" final segment 2 [119, 410] -> [99, 640] does not honor toSide \"top\" — it must run vertical downward from above; keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments.",
+            "subject": {
+              "diagramType": "architecture",
+              "collection": "connections",
+              "index": 10,
+              "id": "agents-provider",
+              "from": "agents",
+              "to": "provider"
+            },
+            "evidence": {
+              "endpoint": "target",
+              "authoredField": "toSide",
+              "sideOrigin": "authored",
+              "side": "top",
+              "segmentIndex": 2,
+              "from": [
+                119,
+                410
+              ],
+              "to": [
+                99,
+                640
+              ],
+              "expectedAxis": "vertical",
+              "expectedDirection": "downward from above"
+            },
+            "supportedFixes": [
+              "keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments"
+            ]
+          }
+        ],
+        "provenance": "failed",
+        "update": {
+          "status": "unavailable",
+          "installedVersion": null,
+          "availableVersion": null,
+          "releaseNotes": null,
+          "checkedAt": null,
+          "source": null,
+          "noticeRequired": false,
+          "noticeText": null,
+          "reason": "disabled"
+        }
+      },
+      "execution": "embedded-in-deliver"
+    },
+    "deliver": {
+      "status": "not-run",
+      "execution": "blocked-by-validate"
+    }
+  },
+  "browserCheck": {
+    "requested": true,
+    "ran": false
+  },
+  "diagnostics": [
+    {
+      "code": "clean-flow/endpoint-side-direction",
+      "severity": "error",
+      "message": "[clean-flow/endpoint-side-direction] architecture connections[10] id \"agents-provider\" \"agents\" -> \"provider\" final segment 2 [119, 410] -> [99, 640] does not honor toSide \"top\" — it must run vertical downward from above; keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments.",
+      "subject": {
+        "diagramType": "architecture",
+        "collection": "connections",
+        "index": 10,
+        "id": "agents-provider",
+        "from": "agents",
+        "to": "provider"
+      },
+      "evidence": {
+        "endpoint": "target",
+        "authoredField": "toSide",
+        "sideOrigin": "authored",
+        "side": "top",
+        "segmentIndex": 2,
+        "from": [
+          119,
+          410
+        ],
+        "to": [
+          99,
+          640
+        ],
+        "expectedAxis": "vertical",
+        "expectedDirection": "downward from above"
+      },
+      "supportedFixes": [
+        "keep automatic routing so the renderer can use a side-aware bridge, or set truthful fromSide/toSide with perpendicular via segments"
+      ]
+    }
+  ],
+  "evidence": {
+    "receipt": "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/review-2/layerflow-architecture.finalize.json",
+    "summaryReceipt": "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/review-2/layerflow-architecture.finalize-summary.json"
+  },
+  "visualReview": "not-requested",
+  "failedStage": "validate",
+  "finishedAt": "2026-10-23T07:48:40.537Z",
+  "durationMs": 226,
+  "update": {
+    "status": "current",
+    "installedVersion": "3.2.0",
+    "availableVersion": "3.2.0",
+    "releaseNotes": null,
+    "checkedAt": "2026-10-23T07:46:03.594Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  }
+}

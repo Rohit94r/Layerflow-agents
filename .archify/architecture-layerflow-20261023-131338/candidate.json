@@ -1,0 +1,513 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "LayerFlow Agents — System Architecture",
+    "subtitle": "Editorial discovery, grounded generation, review and publishing on one VPS",
+    "output": ".archify/architecture-layerflow-20261023-131338/layerflow-architecture.html",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Rohit94r/Layerflow-agents",
+      "provider": "github",
+      "revision": "56452c83a735bc5b7da580a91f3b630466bd1173"
+    }
+  },
+  "components": [
+    {
+      "id": "operator",
+      "type": "external",
+      "label": "Editor / operator",
+      "sublabel": "Browser",
+      "icon": "person",
+      "pos": [
+        180,
+        110
+      ],
+      "size": [
+        120,
+        64
+      ],
+      "tag": "human review"
+    },
+    {
+      "id": "caddy",
+      "type": "security",
+      "label": "Caddy",
+      "sublabel": "TLS · reverse proxy",
+      "pos": [
+        180,
+        250
+      ],
+      "size": [
+        120,
+        64
+      ],
+      "tag": "443"
+    },
+    {
+      "id": "web",
+      "type": "frontend",
+      "label": "Next.js Web",
+      "sublabel": "App Router · same-origin UI",
+      "pos": [
+        356,
+        250
+      ],
+      "size": [
+        150,
+        74
+      ],
+      "sources": [
+        {
+          "path": "apps/web/app/(app)/layout.tsx",
+          "line": 8,
+          "end_line": 33
+        },
+        {
+          "path": "apps/web/lib/api.ts",
+          "line": 51,
+          "end_line": 64
+        }
+      ]
+    },
+    {
+      "id": "api",
+      "type": "backend",
+      "label": "FastAPI API",
+      "sublabel": "REST · SSE · auth",
+      "pos": [
+        594,
+        250
+      ],
+      "size": [
+        150,
+        74
+      ],
+      "sources": [
+        {
+          "path": "apps/api/app/main.py",
+          "line": 30,
+          "end_line": 67
+        }
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "PostgreSQL",
+      "sublabel": "queue · content · audit",
+      "pos": [
+        854,
+        250
+      ],
+      "size": [
+        150,
+        74
+      ],
+      "tag": "16",
+      "sources": [
+        {
+          "path": "docker-compose.yml",
+          "line": 18,
+          "end_line": 36
+        },
+        {
+          "path": "apps/api/app/models/ops.py",
+          "line": 13,
+          "end_line": 45
+        }
+      ]
+    },
+    {
+      "id": "fetcher",
+      "type": "backend",
+      "label": "Fetcher",
+      "sublabel": "guarded HTTP · cache",
+      "pos": [
+        122,
+        440
+      ],
+      "size": [
+        140,
+        74
+      ],
+      "sources": [
+        {
+          "path": "apps/api/app/services/fetcher.py",
+          "line": 89,
+          "end_line": 145
+        },
+        {
+          "path": "apps/api/app/services/fetcher.py",
+          "line": 147,
+          "end_line": 172
+        }
+      ]
+    },
+    {
+      "id": "agents",
+      "type": "backend",
+      "label": "Stage agents",
+      "sublabel": "research · write · edit · seo · qa",
+      "pos": [
+        380,
+        440
+      ],
+      "size": [
+        150,
+        74
+      ],
+      "sources": [
+        {
+          "path": "apps/api/app/worker.py",
+          "line": 37,
+          "end_line": 92
+        },
+        {
+          "path": "apps/api/app/agents/state.py",
+          "line": 25,
+          "end_line": 33
+        }
+      ]
+    },
+    {
+      "id": "worker",
+      "type": "backend",
+      "label": "Worker",
+      "sublabel": "model + IO lanes",
+      "pos": [
+        630,
+        440
+      ],
+      "size": [
+        136,
+        74
+      ],
+      "sources": [
+        {
+          "path": "apps/api/app/worker.py",
+          "line": 95,
+          "end_line": 137
+        },
+        {
+          "path": "apps/api/app/worker.py",
+          "line": 217,
+          "end_line": 327
+        }
+      ]
+    },
+    {
+      "id": "orchestrator",
+      "type": "backend",
+      "label": "Orchestrator",
+      "sublabel": "stage routing · QA loop",
+      "pos": [
+        854,
+        440
+      ],
+      "size": [
+        150,
+        74
+      ],
+      "sources": [
+        {
+          "path": "apps/api/app/agents/orchestrator.py",
+          "line": 63,
+          "end_line": 141
+        },
+        {
+          "path": "apps/api/app/agents/state.py",
+          "line": 35,
+          "end_line": 52
+        }
+      ]
+    },
+    {
+      "id": "provider",
+      "type": "external",
+      "label": "Model endpoint",
+      "sublabel": "Ollama / OpenAI-compatible",
+      "pos": [
+        24,
+        640
+      ],
+      "size": [
+        150,
+        74
+      ],
+      "sources": [
+        {
+          "path": "apps/api/app/providers/registry.py",
+          "line": 36,
+          "end_line": 56
+        },
+        {
+          "path": "apps/api/app/providers/registry.py",
+          "line": 75,
+          "end_line": 92
+        },
+        {
+          "path": "apps/api/app/core/config.py",
+          "line": 41,
+          "end_line": 50
+        }
+      ]
+    },
+    {
+      "id": "publisher",
+      "type": "backend",
+      "label": "Publisher",
+      "sublabel": "idempotent adapters",
+      "pos": [
+        623,
+        640
+      ],
+      "size": [
+        150,
+        74
+      ],
+      "sources": [
+        {
+          "path": "apps/api/app/agents/publisher.py",
+          "line": 1,
+          "end_line": 52
+        },
+        {
+          "path": "apps/api/app/adapters/base.py",
+          "line": 29,
+          "end_line": 56
+        }
+      ]
+    },
+    {
+      "id": "sources",
+      "type": "external",
+      "label": "News sources & APIs",
+      "sublabel": "RSS · Google News · GDELT",
+      "pos": [
+        102,
+        800
+      ],
+      "size": [
+        180,
+        74
+      ]
+    },
+    {
+      "id": "destinations",
+      "type": "external",
+      "label": "Publishing targets",
+      "sublabel": "TEN · WordPress · LinkedIn",
+      "pos": [
+        608,
+        800
+      ],
+      "size": [
+        180,
+        74
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "VPS · Docker Compose",
+      "wraps": [
+        "caddy",
+        "web",
+        "api",
+        "db",
+        "fetcher",
+        "agents",
+        "worker",
+        "orchestrator",
+        "publisher",
+        "provider"
+      ],
+      "pad": 22
+    }
+  ],
+  "connections": [
+    {
+      "id": "operator-caddy",
+      "from": "operator",
+      "to": "caddy",
+      "label": "HTTPS",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "caddy-web",
+      "from": "caddy",
+      "to": "web",
+      "label": "pages"
+    },
+    {
+      "id": "web-api",
+      "from": "web",
+      "to": "api",
+      "label": "JSON · SSE",
+      "variant": "emphasis"
+    },
+    {
+      "id": "api-db",
+      "from": "api",
+      "to": "db",
+      "label": "SQL · enqueue",
+      "variant": "emphasis"
+    },
+    {
+      "id": "caddy-api",
+      "from": "caddy",
+      "to": "api",
+      "label": "/api · /site",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          240,
+          210
+        ],
+        [
+          669,
+          210
+        ]
+      ]
+    },
+    {
+      "id": "db-worker",
+      "from": "db",
+      "to": "worker",
+      "label": "claim jobs",
+      "fromSide": "left",
+      "toSide": "top",
+      "via": [
+        [
+          800,
+          287
+        ],
+        [
+          800,
+          380
+        ],
+        [
+          698,
+          380
+        ]
+      ]
+    },
+    {
+      "id": "worker-orchestrator",
+      "from": "worker",
+      "to": "orchestrator",
+      "label": "next stage"
+    },
+    {
+      "id": "orchestrator-db",
+      "from": "orchestrator",
+      "to": "db",
+      "label": "enqueue next stage",
+      "fromSide": "top",
+      "toSide": "bottom"
+    },
+    {
+      "id": "worker-agents",
+      "from": "worker",
+      "to": "agents",
+      "label": "dispatch stage",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "agents-fetcher",
+      "from": "agents",
+      "to": "fetcher",
+      "label": "fetch feeds / pages",
+      "fromSide": "left",
+      "toSide": "right"
+    },
+    {
+      "id": "agents-provider",
+      "from": "agents",
+      "to": "provider",
+      "label": "LLM + embeddings",
+      "fromSide": "top",
+      "toSide": "top",
+      "via": [
+        [
+          455,
+          410
+        ],
+        [
+          99,
+          410
+        ]
+      ]
+    },
+    {
+      "id": "fetcher-sources",
+      "from": "fetcher",
+      "to": "sources",
+      "label": "RSS · HTML · APIs",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "worker-publisher",
+      "from": "worker",
+      "to": "publisher",
+      "label": "run publish",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "id": "publisher-destinations",
+      "from": "publisher",
+      "to": "destinations",
+      "label": "adapters",
+      "variant": "emphasis",
+      "fromSide": "bottom",
+      "toSide": "top"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Runtime & access",
+      "items": [
+        "Next.js calls same-origin /api/v1 with an HTTP-only session cookie and a CSRF header.",
+        "FastAPI owns authentication, tenant scoping, CRUD, and SSE streams for jobs and article events.",
+        "Caddy terminates TLS; /api/* and /site/* go straight to FastAPI while all other paths reach the web container."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Agent pipeline",
+      "items": [
+        "Stages run in order: research → write → edit → seo → qa, then human review, approval, scheduling and publishing.",
+        "The orchestrator validates every state transition; QA can send work back to write or edit, capped by quality.max_revisions (default 2).",
+        "Each stage is a queued job; failures retry with backoff or move the article to failed / needs_sources."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Discovery & evidence",
+      "items": [
+        "Active sources are RSS feeds or syndication APIs, fetched through one guarded Fetcher with SSRF checks, robots.txt and per-domain pacing.",
+        "Discovery normalises URLs, filters non-English and avoided topics, clusters duplicates, then scores and enriches the strongest stories.",
+        "Research assembles a grounded source pack; the critic blocks an article when grounding is insufficient."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Deployment & operations",
+      "items": [
+        "Docker Compose runs Caddy, web, API, worker and PostgreSQL 16; Ollama is an optional local-model profile.",
+        "The worker runs one model lane and two IO lanes; housekeeping recovers stale jobs, schedules discovery, checks model/disk health and applies retention.",
+        "Artifacts, fetch cache, staged site and backups are named volumes; only Caddy publishes ports."
+      ]
+    }
+  ]
+}

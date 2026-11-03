@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "4e674cbe-d6f6-4e07-98e8-71bf6f1903f5",
+  "status": "current",
+  "command": "deliver",
+  "type": "architecture",
+  "input": "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/candidate.json",
+  "output": "/Users/rohitjadhav/projects/Layerflow-agents/.archify/architecture-layerflow-20261023-131338/layerflow-architecture.html",
+  "specification": {
+    "sha256": "1455ed731f357b0205dd983ba2af6a90d45157de79f0ea3664f32f3d582ab49e",
+    "bytes": 11021
+  },
+  "artifact": {
+    "sha256": "dc296cc0078eeb01c89921397f1d1e989ab1aecca9e0d075f04f21dc2e26020f",
+    "bytes": 840582
+  }
+}
