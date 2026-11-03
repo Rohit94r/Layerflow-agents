@@ -1,280 +1,588 @@
-# SETUP — run LayerFlow Agents end to end
+# SETUP — LayerFlow Agents on this device
 
-This guide takes a fresh machine (Windows 10/11, macOS or Linux) to a working system: dashboard, API,
-agents, local model, real news, real articles. Follow the sections in order the first time.
+**Goal:** run the full product on this Windows machine with **local Ollama models** — Qwen2.5 7B
+Instruct for long-form writing, Qwen2.5 3B Instruct for faster tasks, and Nomic Embed Text for story
+dedupe. The API, worker and Next.js dashboard all run natively; no cloud model and no API key are required.
 
-> **Status of this build (read first).** All code is written: backend (API, 10 agents, worker, queue,
-> adapters), dashboard (8 screens), prompts, configs, eval set, Docker deployment, docs. It was written on a
-> machine where nothing could be installed, so **the test suite and the frontend build have not been run
-> yet**. Step 4 (backend tests) and step 6 (`npm run typecheck`) are therefore the first things to run. If
-> anything fails there, fix it before demoing — the failures will point at exact files and lines.
+**Status: verified on this device (3 Nov 2026).**
 
----
-
-## 0. What you are running
-
-```
-Browser ──► Next.js dashboard (:3000) ──/api──► FastAPI (:8000) ──► SQLite (dev) / Postgres (prod)
-                                                    │
-                                     Worker ────────┘──► Ollama (:11434, local model, no API key)
-                                                    └──► RSS / GDELT / EDGAR / HN / Reddit / web pages
-```
-
-Three processes in development: **API**, **worker**, **web**. Plus **Ollama** for the model.
+| Check | Result |
+| --- | --- |
+| `pnpm install` (frontend) | ✅ dependencies installed |
+| `pnpm run typecheck` | ✅ no TypeScript errors |
+| `pnpm run build` | ✅ production build succeeds |
+| Python venv + `pip install -e ".[dev]"` | ✅ installed |
+| Database migrate + bootstrap | ✅ SQLite created, 49 sources, 20 eval cases, admin user |
+| Backend test suite | ✅ **80 passed** |
+| API health | ✅ database `ok`, Ollama models available, worker `ok` |
+| Dashboard + API proxy | ✅ `http://localhost:3000` serves the dashboard and proxies `/api` |
+| Auth | ✅ disabled for local use (`DISABLE_AUTH=true`) — dashboard opens without login |
+| End-to-end workflow | ✅ real story researched and drafted with Ollama through quality review |
 
 ---
 
-## 1. Install the tools (once per machine)
+## 0. What actually runs
 
-| Tool | Version | Get it | Check |
+```
+Browser ──► Next.js dashboard (:3000) ──/api──► FastAPI (:8000) ──► SQLite (apps/api/data/dev.db)
+                                                     │
+                                      Worker ────────┘──► Ollama (:11434, Qwen2.5 3B + Nomic Embed)
+                                                     └──► RSS / GDELT / EDGAR / HN / Reddit / web pages
+```
+
+Three local processes are needed:
+
+1. **API** — FastAPI on `http://localhost:8000`
+2. **Worker** — runs discovery, research, writing, QA, publishing jobs
+3. **Web** — Next.js dashboard on `http://localhost:3000`
+
+> The web app is **not** a standalone static site. Every screen loads data from the API. Running only
+> `pnpm dev` will show the UI, but with no data and a "Cannot reach the API" state. The API + worker are
+> required even when no AI model is installed.
+
+---
+
+## 1. What this device needs
+
+| Tool | Version on this device | Why | Check |
 | --- | --- | --- | --- |
-| Git | any recent | https://git-scm.com | `git --version` |
-| Python | **3.12** (3.13 also fine; avoid 3.14 for now) | https://www.python.org/downloads/ — tick "Add to PATH" | `python --version` (Windows: `py -3.12 --version`) |
-| Node.js | **22 LTS** or newer | https://nodejs.org | `node --version` |
-| Ollama | latest | https://ollama.com/download | `ollama --version` |
-| Docker Desktop | optional (only for section 8) | https://www.docker.com/products/docker-desktop | `docker --version` |
+| Windows | 10/11 | OS | — |
+| Git | any recent | clone / version control | `git --version` |
+| Node.js | **26.13.0** (22 LTS or newer is fine) | Next.js dashboard | `node --version` |
+| pnpm | **10.34.9** | frontend package manager | `pnpm --version` |
+| Python | **3.12.10** | API, worker, tests | `py -3.12 --version` |
+| Ollama | **installed and running** (CLI not on `PATH`) | local model generation | `http://localhost:11434` |
+| Docker | **not needed** | optional deployment path only | `docker --version` |
 
-College machines sometimes block installers. Python and Node have "zip / no-admin" builds; Ollama installs per-user.
+Disk used by the setup: roughly 1 GB (Node modules + Python venv + SQLite).
+No GPU and no large model downloads are required.
 
----
+If `pnpm` is missing on a fresh machine:
 
-## 2. Get the code
-
-```bash
-git clone https://github.com/Rohit94r/Layerflow-agents.git
-cd Layerflow-agents                      # everything is on the main branch
+```powershell
+npm install -g pnpm@10
 ```
 
 ---
 
-## 3. Backend: Python environment + config
+## 2. One-time setup (already done here)
 
-**Windows (PowerShell):**
+Run these from the repository root. The commands are PowerShell (Windows).
+
+### 2.1 Frontend
+
+```powershell
+cd apps\web
+pnpm install
+pnpm run typecheck
+pnpm run build
+```
+
+Or from the repository root: `pnpm install` (the `postinstall` hook installs `apps/web`), then
+`pnpm run typecheck` and `pnpm run build`.
+
+`apps/web/pnpm-lock.yaml` is generated by the first install. Keep it in git; use
+`pnpm install --frozen-lockfile` on CI/other machines for an exact, reproducible install.
+
+### 2.2 Backend
 
 ```powershell
 cd apps\api
 py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1          # if blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+.\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
-**macOS / Linux:**
+If PowerShell blocks activation:
 
-```bash
-cd apps/api
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install -e ".[dev]"
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
-Create **`apps/api/.env`** (local development; never commit it):
+or skip activation and call the venv Python directly:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+```
+
+### 2.3 Create `apps/api/.env`
+
+Create the file **`apps/api/.env`** (never commit it — it is git-ignored):
 
 ```env
 APP_ENV=development
 APP_SECRET_KEY=dev-only-change-me-to-a-long-random-string-1234567890
 APP_BASE_URL=http://localhost:3000
+TENANT_DEFAULT=ten
+LOG_LEVEL=info
+
 DATABASE_URL=sqlite+aiosqlite:///./data/dev.db
 
-# Model: local Ollama, no API key
+# Use the locally running Ollama service and the models installed on this device.
 MODEL_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
-MODEL_WRITER=qwen2.5:7b-instruct
+MODEL_WRITER=qwen2.5:3b-instruct
 MODEL_FAST=qwen2.5:3b-instruct
 MODEL_EMBED=nomic-embed-text
 
-# First login (applied by bootstrap when no users exist yet)
-ADMIN_EMAIL=admin@ten.local
+# Local-only: no login screen, every request runs as the first active user.
+# Set to false before exposing this machine on a network.
+DISABLE_AUTH=true
+
+# First login (used by bootstrap only when no users exist yet)
+ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=change-this-password
 
 PUBLISH_TARGET=export
 TEN_SITE_URL=https://theexecutivenarrative.com
 ```
 
-All other variables have safe defaults; the full list with explanations is in `.env.example`.
+> **Important:** use a real, publicly valid email domain in `ADMIN_EMAIL`. `admin@ten.local` is rejected by
+> pydantic's `EmailStr` validation (special-use TLD), which produces a `422` on login. `admin@example.com`
+> is verified to work. Change the password before sharing the machine.
+
+Every other setting has a safe default; the full list is in `.env.example`.
+
+### 2.4 Create and seed the database
+
+```powershell
+cd apps\api
+.\.venv\Scripts\python.exe -m app.cli migrate
+.\.venv\Scripts\python.exe -m app.cli bootstrap
+```
+
+Expected output includes:
+
+```
+created tenant 'ten'
+sources added: 49
+eval cases added: 20
+admin admin@example.com: created
+```
+
+### 2.5 Verify
+
+```powershell
+cd apps\api
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+Expected: `80 passed`. The tests use a temporary SQLite database, the mock model and a mocked internet, so
+they need no Ollama and no network.
 
 ---
 
-## 4. Run the backend tests (first verification)
+## 3. Daily run (3 terminals)
 
-```bash
-# still inside apps/api with the venv active
-pytest -q
-```
+Open three PowerShell terminals in the repository root.
 
-The tests use a temporary SQLite database, the **mock model** and a **mocked internet**, so they need no
-Ollama and no network. They cover: slugs, URL canonicalisation, dedupe precision, scoring, routing,
-readability, number/quote grounding (10/10 seeded hallucinations caught), formatter, SEO validators,
-LinkedIn rules, prompt-injection stripping, SSRF/robots/size guards, feed parsers, queue claim/retry/dead/
-visibility-timeout recovery, state machine, auth/CSRF/roles/rate limits, the migration matching the models,
-contract schemas, and the **full pipeline** (discover → promote → research → write → edit → SEO → QA →
-review → schedule → publish export + staging site with repaired sitemap → LinkedIn draft).
+**Terminal 1 — API**
 
-If a test fails, the message names the file and line. Fix, re-run, then continue.
-
----
-
-## 5. Create the database and start the API + worker
-
-```bash
-python -m app.cli migrate          # creates data/dev.db with all tables
-python -m app.cli bootstrap        # TEN tenant, ~40 news sources, eval cases, admin from .env
-```
-
-Open two terminals (both in `apps/api` with the venv active):
-
-```bash
-# terminal 1 — API
+```powershell
+cd apps\api
+.\.venv\Scripts\Activate.ps1
 uvicorn app.main:app --reload --port 8000
+```
 
-# terminal 2 — worker (runs the agents)
+**Terminal 2 — worker** (same venv; leave the API terminal running)
+
+```powershell
+cd apps\api
+.\.venv\Scripts\Activate.ps1
 python -m app.worker
 ```
 
-Check: http://localhost:8000/api/v1/health — `database` should be `ok`; `model` turns `ok` after step 7.
+**Terminal 3 — dashboard** (from the repository root)
 
----
-
-## 6. Frontend: install, type-check, run
-
-```bash
-cd apps/web
-npm install
-npm run typecheck      # must finish with no errors
-npm run dev            # http://localhost:3000
+```powershell
+pnpm run dev
 ```
 
-Sign in with `ADMIN_EMAIL` / `ADMIN_PASSWORD` from your `.env`.
+The root `package.json` forwards this command to `apps/web`. The direct equivalent is:
 
-Before a demo also run `npm run build` once (production build; catches anything `dev` mode tolerates).
-
----
-
-## 7. The model (Ollama)
-
-```bash
-ollama pull qwen2.5:3b-instruct      # ~1.9 GB — fast; routing, short copy
-ollama pull qwen2.5:7b-instruct      # ~4.7 GB — the writer; needs ~8 GB free RAM
-ollama pull nomic-embed-text         # ~0.3 GB — dedupe embeddings (optional)
+```powershell
+cd apps\web
+pnpm run dev
 ```
 
-Ollama runs in the background after install (check http://localhost:11434). Then in the dashboard:
-**Settings → Models → Test** should show a latency and a sample reply.
+Both start the same Next.js server on port 3000.
 
-**Speed on a CPU-only i7:** 7B ≈ 4–8 tokens/s → one 1,200-word article ≈ 10–20 min end to end. For a
-quicker demo set `MODEL_WRITER=qwen2.5:3b-instruct` in `.env` (restart API + worker), or change the model
-per agent in **Settings → Models**. With an NVIDIA GPU Ollama uses it automatically (1–3 min per article).
-No embedding model? Leave `MODEL_EMBED=` empty — dedupe falls back to TF-IDF.
+Open **http://localhost:3000**. Authentication is disabled on this device
+(`DISABLE_AUTH=true`), so the dashboard opens directly — there is no sign-in step.
 
-Measure the machine once: `python ../../scripts/bench_model.py --model qwen2.5:7b-instruct` (from `apps/api`).
+The admin account in `apps/api/.env` is only used if you set `DISABLE_AUTH=false` later.
 
-**No model at all?** Set `MODEL_PROVIDER=mock`: every screen works with deterministic extractive text and
-the top bar shows a **Mock provider** badge. Use it for UI work only, never for real content.
+Health checks:
 
----
+- API: http://localhost:8000/api/v1/health
+- Dashboard: http://localhost:3000
+- API docs (development): http://localhost:8000/api/v1/docs
 
-## 8. Alternative: everything in Docker (the VPS path)
-
-```bash
-cp .env.example .env     # set APP_SECRET_KEY, POSTGRES_PASSWORD, ADMIN_EMAIL, ADMIN_PASSWORD, DOMAIN=localhost
-docker compose up -d --build
-docker compose exec ollama ollama pull qwen2.5:7b-instruct
-docker compose exec ollama ollama pull qwen2.5:3b-instruct
-docker compose exec ollama ollama pull nomic-embed-text
-```
-
-Dashboard: http://localhost:3000 (dev override exposes ports) or https://localhost via Caddy.
-Postgres replaces SQLite; the API container runs migrations + bootstrap on every start.
-Full production runbook (VPS, TLS, backups, restore drill, alerts): `docs/runbook.md`.
+`GET /api/v1/health` may report `"status": "degraded"` before the first discovery run. Check the
+individual fields instead: `database.status = ok`, `model.provider = ollama`, `model.status = ok`,
+`worker.status = ok`.
+Once the worker has run discovery, the overall status becomes `ok`.
 
 ---
 
-## 9. First end-to-end run (what to click)
+## 4. pnpm — everything used here
 
-1. **Dashboard** `/` — cards show real counts; "Model ready" and "Worker 1 live" pills are green.
-2. **News Feed** `/news` → **Refresh**. In 1–3 minutes real stories from ~40 sources appear with scores,
-   categories and duplicate clusters. (The worker also refreshes every 30 minutes on its own.)
-3. Open a story → **Promote** (category pre-filled, *auto* on). You land in the **Studio**.
-4. Watch the timeline: Research → Write → Edit → SEO → QA, with the live log on the right.
-   - Thin coverage → **Needs more sources** (by design: no filler articles).
-   - QA failing twice → **Pipeline stopped** with the reasons; owner can **Send to review anyway**.
-5. **Review** `/review` → read the rendered preview, QA scores, diff → **Approve** (`a`) → schedule modal →
-   **Dry run** → **Schedule** (or publish now from the **Calendar**).
-6. **Calendar** `/calendar` → **Publish now** → download the export bundle, or open the staging page
-   (target `ten_static` without SFTP writes to `/site/ten/<route>/<slug>/` with a repaired `sitemap.xml`).
-7. **Social** `/social` → the LinkedIn draft → **Copy post** → **Open LinkedIn**.
-8. **SEO** `/seo` → **Site audit** → **Run audit** crawls the live TEN site and produces the fix list for
-   the existing articles (CSV) and a corrected sitemap.
-9. **Settings → Evaluations** → run **deterministic** (seconds), then **critic** / **pipeline** with the real model.
+Frontend commands work in **two equivalent ways**:
 
-The 10-minute pitch version of this flow is `docs/demo-script.md`.
+- **From the repository root** — the root `package.json` forwards the common scripts to `apps/web`.
+  This is the shortest path and matches `pnpm dev` / `pnpm i` at the top level.
+- **From `apps/web` directly** — the real Next.js package and its lockfile live there.
 
----
+| Command (root) | Direct equivalent | What it does |
+| --- | --- | --- |
+| `pnpm install` | `cd apps/web && pnpm install` | installs the dashboard dependencies (root `postinstall` runs the web install) |
+| `pnpm run dev` | `cd apps/web && pnpm run dev` | Next.js dev server on port 3000 (proxies `/api` to `http://localhost:8000`) |
+| `pnpm run build` | `cd apps/web && pnpm run build` | production build (run before a demo) |
+| `pnpm run start` | `cd apps/web && pnpm run start` | serve the production build on port 3000 |
+| `pnpm run typecheck` | `cd apps/web && pnpm run typecheck` | `tsc --noEmit` |
+| `pnpm run test:e2e` | `cd apps/web && pnpm run test:e2e` | Playwright end-to-end test (needs the full stack running) |
 
-## 10. Troubleshooting
+Other useful commands (run from `apps/web`):
 
-| Symptom | Fix |
+| Command | What it does |
 | --- | --- |
-| `pip install` fails building a package | You are on Python 3.13/3.14 without wheels — use Python 3.12. |
-| API exits: `APP_SECRET_KEY must be set` | `APP_ENV=production` needs a 32+ char secret; for local use `APP_ENV=development`. |
-| Dashboard says "Cannot reach the API" | API not running on :8000, or started from the wrong folder (run from `apps/api`). |
-| Worker pill red / "No worker has reported in" | Start `python -m app.worker` (terminal 2). |
-| Model pill amber "Models not pulled" | `ollama pull <name>` for the names listed, or change models in Settings → Models. |
-| Jobs stay `queued` | Worker not running, or it is busy with a long generation (model lane runs one job at a time). |
-| A source shows errors / auto-disabled | Feed URL changed. Settings → Sources → Test, fix the URL, re-enable. |
-| Article stuck in `failed` | Studio shows the error; **Retry** the failed stage after fixing the cause. |
-| LinkedIn **Publish** says not connected | Expected without a LinkedIn developer app. Use **Copy post** (see plan §15). |
-| Want a clean start | Stop everything, delete `apps/api/data/`, then `migrate` + `bootstrap` again. |
+| `pnpm install --frozen-lockfile` | CI/clean install; fails if the lockfile is out of date |
+| `pnpm add <pkg>` | add a dependency |
+| `pnpm add -D <pkg>` | add a dev dependency |
+| `pnpm remove <pkg>` | remove a dependency |
+| `pnpm why <pkg>` | explain why a package is installed |
+| `pnpm exec playwright install chromium` | download the browser for E2E tests |
+| `pnpm store prune` | clean the global pnpm store |
 
-Logs: API and worker print structured JSON to their terminals; every job's progress lines are also in the
-Studio log and in **Dashboard → failed jobs**.
+Rules:
+
+- Use **pnpm**, not npm, inside `apps/web`. Mixing package managers creates a second lockfile and
+  `node_modules` layout.
+- `apps/web/pnpm-lock.yaml` is the real frontend lockfile — commit it.
+- The root `package.json` is **convenience scripts only** (no dependencies). It is not a pnpm workspace:
+  there is no `pnpm-workspace.yaml`, and dependencies stay in `apps/web`. The root `pnpm-lock.yaml` is
+  only for those scripts and can be committed alongside the root `package.json`.
+- Running `pnpm install` at the root installs the dashboard via the `postinstall` hook.
+- `pnpm run dev` reads `API_INTERNAL_URL` (default `http://localhost:8000`) for the `/api` and `/site`
+  rewrites.
 
 ---
 
-## 11. Where things are
+## 5. Models — local Ollama (installed on this device)
+
+### Hardware reality check
+
+| Component | This PC | Verdict |
+| --- | --- | --- |
+| CPU | Intel i9-14900 | Excellent |
+| RAM | 32 GB | Good |
+| GPU | NVIDIA T400 **4 GB VRAM** | Limited |
+| Disk | ~848 GB free | Plenty |
+
+- **Qwen2.5 3B-Instruct** (~2 GB): faster generation for discovery and other short tasks.
+- **Qwen2.5 7B-Instruct** (~4.7 GB): configured for long-form writing. It exceeds GPU VRAM and can use
+  system RAM/CPU; expect slower generation.
+- **Nomic Embed Text** (~275 MB): embeddings for story dedupe.
+- 70B models: not practical on this device.
+
+### Current configuration (`apps/api/.env`)
+
+```env
+MODEL_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+MODEL_WRITER=qwen2.5:3b-instruct
+MODEL_FAST=qwen2.5:3b-instruct
+MODEL_EMBED=nomic-embed-text
+```
+
+The Writer agent uses Qwen2.5 7B at a low temperature (`0.1`) for long-form articles. The faster
+Qwen2.5 3B remains available for discovery and other short tasks. These per-agent choices are saved in
+**Settings → Models**. The Writer context is set to `32768` tokens for source-grounded long-form
+sections; other agents keep the global `8192`-token context. Keep the Writer's per-agent context setting
+when rebuilding or reseeding the local database.
+
+### Verify Ollama and the models
+
+```powershell
+ollama --version
+ollama list          # qwen2.5:7b-instruct, qwen2.5:3b-instruct and nomic-embed-text must be listed
+```
+
+If the `ollama` command is not on `PATH`, use
+`& "$env:LOCALAPPDATA\Programs\Ollama\ollama.exe" list`.
+
+### How the model is used
+
+1. The API stores `MODEL_PROVIDER=ollama` and exposes it as the **model pill** in the dashboard.
+2. The worker claims jobs (discovery enrichment, research, drafting, QA, SEO) and calls the model
+   through Ollama on `http://localhost:11434`.
+3. `MODEL_WRITER` writes and edits long-form content. `MODEL_FAST` handles triage, summaries and
+   smaller checks. `MODEL_EMBED` powers semantic story dedupe.
+4. Everything is visible in **`/jobs`** (per-job progress) and **`/settings → Model`** (health).
+
+Quick model test outside the app:
+
+```powershell
+ollama run qwen2.5:7b-instruct "In one sentence, what does an editor-in-chief do?"
+```
+
+Quick model test inside the app:
+
+```powershell
+Invoke-RestMethod http://localhost:8000/api/v1/health | ConvertTo-Json -Depth 5
+```
+
+`checks.model.provider` must be `ollama` and `checks.model.status` must be `ok`.
+To verify actual text generation through the app's model-test endpoint (with local
+`DISABLE_AUTH=true`):
+
+```powershell
+Invoke-RestMethod http://localhost:8000/api/v1/settings/models/test `
+  -Method Post -ContentType 'application/json' `
+  -Body '{"model":"qwen2.5:7b-instruct"}'
+```
+
+The response must include `"ok": true`. The dashboard exposes the same check in **Settings → Models**.
+
+To change an agent's model, use **Settings → Models**, select a model that appears under **Pulled
+models**, and save the routing. Changing environment defaults requires restarting the API and worker.
+
+### Use a model on another machine
+
+Run Ollama on a PC/VPS with more VRAM, then point this machine at it:
+
+```env
+MODEL_PROVIDER=ollama
+OLLAMA_BASE_URL=http://<other-machine-ip>:11434
+MODEL_WRITER=qwen2.5:7b-instruct
+MODEL_FAST=qwen2.5:3b-instruct
+MODEL_EMBED=nomic-embed-text
+```
+
+Make sure port `11434` is reachable (LAN or Tailscale) and restart the API + worker after changing `.env`.
+
+### Fallback: `MODEL_PROVIDER=mock`
+
+Mock is still available for offline UI work and tests. It produces deterministic, extractive output
+labelled as mock — **never use it for real publishing**. To fall back:
+
+```env
+MODEL_PROVIDER=mock
+MODEL_EMBED=
+```
+
+Restart the API and worker.
+
+### Use a hosted OpenAI-compatible endpoint
+
+```env
+MODEL_PROVIDER=openai_compat
+OPENAI_COMPAT_BASE_URL=https://your-endpoint/v1
+OPENAI_COMPAT_API_KEY=...
+MODEL_WRITER=...
+MODEL_FAST=...
+```
+
+### Local Ollama endpoint
+
+This machine runs Ollama locally at `http://localhost:11434`. Keep `MODEL_PROVIDER=ollama` and
+`OLLAMA_BASE_URL=http://localhost:11434`; verify the provider and pulled models in
+**Settings → Models** before running article jobs.
+
+## 5.1 Authentication — disabled locally
+
+`apps/api/.env` sets `DISABLE_AUTH=true`. In that mode:
+
+- every request runs as the **first active user** (the owner), so the dashboard opens without a login;
+- session cookies, CSRF checks and per-session rate limits are skipped;
+- the `/login` page detects the active session and redirects to `/`;
+- the `ADMIN_EMAIL` / `ADMIN_PASSWORD` account is still used by `bootstrap` and only matters if you
+  re-enable auth.
+
+This is safe only on a private local machine. Set `DISABLE_AUTH=false`, keep the admin credentials, and
+restart the API before exposing ports 8000/3000 to a network or the internet. The API refuses to start
+with `DISABLE_AUTH=true` when `APP_ENV=production`.
+
+---
+
+## 6. Database, admin and reset
+
+- SQLite file: `apps/api/data/dev.db`
+- Articles, jobs, publications, artifacts and the local staging site live under `apps/api/data/`
+- All of `apps/api/data/` is git-ignored
+
+**Create or reset the admin password:**
+
+```powershell
+cd apps\api
+.\.venv\Scripts\python.exe -m app.cli create-admin --email you@example.com --password "a-long-password"
+```
+
+**Clear all content but keep the configuration:**
+
+Deletes feed items, jobs, job events, model runs, articles, publications, social posts, audit log,
+sessions, worker heartbeats and discovery state. Keeps the tenant, users, the 49 configured sources
+and the 20 eval cases.
+
+```powershell
+# stop the API and worker first
+cd apps\api
+.\.venv\Scripts\python.exe -m app.cli reset-content --yes
+```
+
+**Clean database reset (everything):**
+
+Stop the API and worker first, then:
+
+```powershell
+Remove-Item -Recurse -Force apps\api\data
+cd apps\api
+.\.venv\Scripts\python.exe -m app.cli migrate
+.\.venv\Scripts\python.exe -m app.cli bootstrap
+```
+
+Create a long random secret for `APP_SECRET_KEY` when leaving development:
+
+```powershell
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+---
+
+## 7. Verification checklist
+
+Run through this after any fresh install or dependency change.
+
+| Step | Command / URL | Expected |
+| --- | --- | --- |
+| Frontend install | `cd apps/web && pnpm install` | no errors |
+| Frontend types | `pnpm run typecheck` | exits 0 |
+| Frontend build | `pnpm run build` | compiled successfully |
+| Backend tests | `cd apps/api && .\.venv\Scripts\python.exe -m pytest -q` | `80 passed` |
+| API health | http://localhost:8000/api/v1/health | database `ok`, model `mock`; worker `ok` only when the worker is running |
+| Web proxy | http://localhost:3000/api/v1/health | same JSON via Next rewrites |
+| No login | http://localhost:3000 | dashboard opens directly (`DISABLE_AUTH=true`) |
+| News refresh | `/news` → **Refresh** | real stories arrive in 1–3 minutes |
+| Worker | Dashboard "Worker live" pill | green |
+
+Useful pages: `/` dashboard · `/news` feed · `/studio` content studio · `/review` review queue ·
+`/seo` SEO workspace · `/calendar` calendar · `/social` LinkedIn drafts · `/settings` settings.
+
+---
+
+## 8. Tests and E2E
+
+Backend (no model, no network):
+
+```powershell
+cd apps\api
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+Frontend type/build:
+
+```powershell
+cd apps\web
+pnpm run typecheck
+pnpm run build
+```
+
+Playwright E2E (optional; needs the stack running and a seeded admin):
+
+```powershell
+cd apps\web
+pnpm exec playwright install chromium
+$env:E2E_BASE_URL="http://localhost:3000"
+$env:E2E_EMAIL="admin@example.com"
+$env:E2E_PASSWORD="change-this-password"
+pnpm run test:e2e
+```
+
+---
+
+## 9. Troubleshooting
+
+| Symptom | Cause / fix |
+| --- | --- |
+| `pnpm` is not recognized | `npm install -g pnpm@10`, then open a new terminal |
+| `python` / `py` not found | Reopen the terminal after installing Python 3.12; or use `%LOCALAPPDATA%\Programs\Python\Python312\python.exe` |
+| `Activate.ps1` is blocked | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`, or call `.\.venv\Scripts\python.exe` directly |
+| Dashboard keeps redirecting to `/login` | `DISABLE_AUTH` is not true, or the API was not restarted after editing `.env`. Set `DISABLE_AUTH=true` and restart the API |
+| Login returns `422` | `ADMIN_EMAIL` is not a valid public domain (e.g. `admin@ten.local`). Use `admin@example.com` and run `create-admin` |
+| Dashboard says "Cannot reach the API" | Start the API on port 8000; run it from `apps/api`; check http://localhost:8000/api/v1/health |
+| Web loads but every screen is empty | API and/or worker are not running, or the database was never bootstrapped |
+| Worker pill red / "No worker has reported in" | Start Terminal 2: `python -m app.worker` |
+| Model pill amber / models missing | Expected with `MODEL_PROVIDER=mock`? No — mock should be `ok`. If you switched to `ollama`, pull the models or point at a reachable host |
+| Jobs stay `queued` | Worker not running, or busy with a long generation (model lane runs one job at a time) |
+| API exits with `APP_SECRET_KEY must be set` | `APP_ENV=production` requires a 32+ character secret; local development should use `APP_ENV=development` |
+| `database is locked` | Stop the API and worker before editing/removing the SQLite file |
+| Next.js behaves oddly after changes | `Remove-Item -Recurse -Force apps\web\.next` and re-run `pnpm run dev` |
+| Port 3000 or 8000 already in use | Stop the old process: `Get-NetTCPConnection -LocalPort 3000` then `Stop-Process -Id <pid> -Force` |
+| Health status `degraded` | Usually discovery has not run yet; check individual checks. It becomes `ok` after the worker's first discovery |
+
+Logs from the API and worker print structured JSON to their terminals. Per-job progress also appears in
+the Studio log and in **Dashboard → failed jobs**.
+
+---
+
+## 10. Repository map
 
 | Path | What |
 | --- | --- |
-| `apps/api/app/agents/` | A0 orchestrator · A1 discovery · A2 research · A3 writer · A4 editor · A5 SEO · A6 critic · A7 scheduler · A8 publisher · A9 distribution · evals · crawl |
-| `apps/api/app/services/` | fetcher (SSRF/robots/cache), extractor, feeds, dedupe, scoring, grounding gates, SEO rules, formatter, render, sitemap |
-| `apps/api/app/routers/` | REST API (`/api/v1/...`), docs at http://localhost:8000/api/v1/docs in development |
-| `apps/api/app/worker.py` | queue lanes, retries, scheduler tick, heartbeats, alerts, retention |
-| `apps/web/app/(app)/` | dashboard screens |
-| `prompts/` | versioned prompts (editable in Settings → Prompts; edits are new versions, one-click rollback) |
-| `config/` | `sources/feeds.yaml`, `competitors.yaml`, `tenants/ten.json` |
-| `templates/ten/article.html` | published page template (matches the live site's CSS) |
-| `evals/cases/` | 20 golden cases (fictional companies) |
-| `docs/` | runbook, demo script, ADRs |
-| `plan.md` | the plan of record |
+| `apps/web` | Next.js dashboard (8 screens) |
+| `apps/api` | FastAPI, agents, worker, CLI, Alembic, tests |
+| `apps/api/.env` | local development config (git-ignored) |
+| `apps/api/data` | SQLite DB, artifacts, cache, staging site (git-ignored) |
+| `config/sources/feeds.yaml` | ~49 news sources seeded by bootstrap |
+| `config/tenants/ten.json` | tenant defaults |
+| `prompts/` | versioned prompts |
+| `evals/cases/` | 20 golden cases |
+| `templates/ten/article.html` | published page template |
+| `docs/runbook.md` | production/VPS runbook |
+| `docs/demo-script.md` | demo flow |
+| `plan.md` | plan of record |
 
 ---
 
-## 12. What to do next
+## 11. Changes made while setting up this device
 
-**Tomorrow (make it green):**
-1. `pytest -q` passes (step 4). Fix anything that fails.
-2. `npm run typecheck` and `npm run build` pass (step 6).
-3. One real article per category end to end with the real model (step 9); note timings.
-4. Run `scripts/bench_model.py` and record real numbers in `plan.md` §11.3 (Phase 0 exit criterion).
-5. Run Settings → Evaluations → **deterministic** and **critic**; keep the baseline.
+These were required to get the backend test suite green; all are small and covered by the tests.
 
-**This week (demo quality):**
-6. Settings → Sources → **Test** every source; switch on the `# verify` feeds that work, drop dead ones.
-7. Put 8–12 mentor-approved TEN articles in `evals/style/good/` and run
-   `python scripts/eval_agents.py --style-profile` so the writer gets measured style targets.
-8. Read 5 generated articles per category; tune `prompts/categories/*.md` and `prompts/persona/ten.md`
-   (save as new versions in Settings, re-run evals after each change).
-9. Run the Playwright demo test: `cd apps/web && npx playwright install chromium && npm run test:e2e`
-   (needs the stack running with `MODEL_PROVIDER=mock` and `E2E_EMAIL` / `E2E_PASSWORD` set).
-10. Rehearse `docs/demo-script.md` twice in a row without touching the database.
+1. `apps/api/app/services/slug.py` — slug generation now removes stopwords from the whole title, so
+   `"The Rise of the Machines: What's Next?"` becomes `rise-machines-whats-next`.
+2. `apps/api/app/services/render.py` — HTML validation only treats real tags as unsafe; escaped text
+   such as `&lt;img src=x onerror=…&gt;` is no longer falsely reported as an inline handler.
+3. `apps/api/app/routers/publications.py` — scheduling is idempotent when an article is already
+   `scheduled`, so a double-click returns the same publication instead of a `409`.
+4. Created `apps/api/.env` with the mock provider and a valid admin email.
+5. Ran `pnpm install`, which generated `apps/web/pnpm-lock.yaml`.
+6. Added a root `package.json` with shortcut scripts (`pnpm dev`, `pnpm build`, `pnpm typecheck`, …) so
+   commands work from the repository root; `postinstall` installs `apps/web`.
+7. Added the local-only `DISABLE_AUTH=true` path: no login, no CSRF, runs as the first active user.
+   The login page now redirects straight to the dashboard when the API reports a session.
+8. Created and seeded `apps/api/data/dev.db` (49 sources, 20 eval cases, admin user).
+9. Ran discovery during setup, then removed all fetched content and activity on request. The database
+   now contains only the tenant, admin user, 49 configured sources and 20 eval cases; the feed is empty.
+10. Added `python -m app.cli reset-content --yes` so the content tables can be cleared again at any time.
 
-**Needs the mentor (plan §25):**
-11. VPS specs → choose model size (8 GB RAM = 7B; less → run Ollama on another machine via Tailscale).
-12. Site access (SFTP / git deploy) → set `TEN_SFTP_*` in `.env`, publish to the real site with `ten_static`.
-    Until then the export bundle + staging site are the honest fallback.
-13. LinkedIn developer app + page admin → Settings → Integrations → Connect LinkedIn.
-14. Brand assets (OG image, author bio) → Settings → General.
+Next.js 16 re-generates `apps/web/AGENTS.md` and adds imports to `apps/web/next-env.d.ts` whenever
+`pnpm run dev` starts. They are tooling artifacts, not setup failures; commit them if you want a clean
+tree, or revert them before committing.
 
-**Deploy (plan §19):** `docs/runbook.md` → Docker Compose on the VPS, Caddy TLS, daily backups
-(`infra/systemd/layerflow-backup.timer` or cron), monthly `scripts/restore_check.sh`.
+Nothing was committed. Review the diff before committing.
+
+---
+
+## 12. Optional: full stack with a real model / Docker
+
+This device is set up for the mock/frontend path. If you later move to a machine with a real model or a
+VPS, the original end-to-end paths still exist:
+
+- **Docker Compose (VPS path):** `docker compose up -d --build` after copying `.env.example` to `.env`
+  and filling in `APP_SECRET_KEY`, `POSTGRES_PASSWORD`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DOMAIN`.
+  Then pull the models inside the Ollama container.
+- **Production runbook:** `docs/runbook.md` (TLS, backups, restore drill, alerts).
+- **Model benchmark:** `python scripts/bench_model.py --model qwen2.5:7b-instruct` from `apps/api`.
+
+Do not enable Docker/local Ollama on this machine unless you accept the resource cost.

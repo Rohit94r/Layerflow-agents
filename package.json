@@ -1,0 +1,15 @@
+{
+  "name": "layerflow-agents",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Repository-level convenience scripts. The dashboard app lives in apps/web.",
+  "scripts": {
+    "postinstall": "pnpm --dir apps/web install",
+    "dev": "pnpm --dir apps/web run dev",
+    "build": "pnpm --dir apps/web run build",
+    "start": "pnpm --dir apps/web run start",
+    "typecheck": "pnpm --dir apps/web run typecheck",
+    "test:e2e": "pnpm --dir apps/web run test:e2e",
+    "web": "pnpm --dir apps/web"
+  }
+}

@@ -17,7 +17,8 @@ from app.core.config import get_settings
 from app.services.article_doc import count_words
 from app.services.playbooks import get_playbook
 
-FORBIDDEN_MARKUP = re.compile(r"<\s*(script(?!\s+type=\"application/ld\+json\")|iframe|object|embed)\b|\son\w+\s*=", re.I)
+FORBIDDEN_MARKUP = re.compile(r"<\s*(script(?!\s+type=\"application/ld\+json\")|iframe|object|embed)\b", re.I)
+INLINE_HANDLER = re.compile(r"\son\w+\s*=", re.I)
 PLACEHOLDER = re.compile(r"\{\{|\}\}|\{%|%\}|(?i:lorem ipsum)|\bTODO\b|\bPLACEHOLDER\b")
 
 
@@ -119,7 +120,7 @@ def validate_html(html: str, *, expected_h1: str | None = None) -> list[str]:
     h1s = re.findall(r"<h1\b", html, re.I)
     if len(h1s) != 1:
         issues.append(f"Rendered page has {len(h1s)} <h1> elements; exactly one is required")
-    if FORBIDDEN_MARKUP.search(html):
+    if FORBIDDEN_MARKUP.search(html) or any(INLINE_HANDLER.search(tag) for tag in re.findall(r"<[^>]+>", html)):
         issues.append("Rendered page contains forbidden markup (script/iframe/inline handler)")
     body = html.split("<body", 1)[-1]
     if PLACEHOLDER.search(body):

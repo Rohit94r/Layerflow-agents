@@ -30,6 +30,8 @@ async def lifespan(_: FastAPI):
 def create_app() -> FastAPI:
     s = get_settings()
     configure_logging(s.log_level)
+    if s.disable_auth:
+        log.warning("DISABLE_AUTH=true — authentication, CSRF and session checks are OFF (local development only)")
     app = FastAPI(
         title="LayerFlow Agents API",
         version="1.0.0",

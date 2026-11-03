@@ -84,6 +84,9 @@ class Settings(BaseSettings):
     token_encryption_key: str = ""
 
     # Auth
+    # Local-only escape hatch: when true, every request runs as the first active user and
+    # CSRF/rate-limit/session checks are skipped. Never enable on a shared or public host.
+    disable_auth: bool = False
     admin_email: str = ""
     admin_password: str = ""
     session_days: int = 7
@@ -110,6 +113,8 @@ class Settings(BaseSettings):
             len(self.app_secret_key) < 32 or self.app_secret_key.startswith("dev-insecure")
         ):
             raise ValueError("APP_SECRET_KEY must be set to 32+ random characters in production")
+        if self.disable_auth and self.is_production:
+            raise ValueError("DISABLE_AUTH=true is only allowed outside production")
         return self
 
     @property

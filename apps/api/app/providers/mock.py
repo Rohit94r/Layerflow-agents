@@ -11,7 +11,7 @@ import re
 from typing import Any
 
 from app.providers.base import ModelResult, ProviderHealth
-from app.services.extractive import CONNECTIVES, _pick, research_pack, section_paragraphs
+from app.services.extractive import CONNECTIVES, research_pack, section_paragraphs
 from app.services.seo_rules import fit_meta, fit_title
 from app.services.text import truncate_words, word_count
 

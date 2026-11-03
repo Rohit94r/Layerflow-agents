@@ -4,6 +4,8 @@
                    admin from ADMIN_EMAIL/ADMIN_PASSWORD (if set), eval cases from evals/cases
   create-admin     --email --password [--name] [--role owner|editor|reviewer]
   seed-sources     add sources from feeds.yaml that are not present yet (matched by URL)
+  reset-content    --yes  delete all fetched/generated content (feed, jobs, runs, articles, logs, sessions)
+                   but keep the tenant, users, sources and eval cases
   run              --type discover|crawl_inventory|crawl_competitors|eval [--suite …]  run one job inline
   drain            process queued jobs until the queue is empty (no long-running worker)
   migrate          alembic upgrade head
@@ -107,6 +109,52 @@ async def seed_eval_cases(tenant: Tenant) -> int:
     return n
 
 
+# Content tables in delete order (children before parents). Configuration tables — tenants, users,
+# sources, eval_cases — are deliberately left untouched.
+CONTENT_TABLES = (
+    "article_versions",
+    "articles",
+    "social_posts",
+    "publications",
+    "site_pages",
+    "review_actions",
+    "research_packs",
+    "prompt_versions",
+    "eval_runs",
+    "model_runs",
+    "job_events",
+    "jobs",
+    "feed_items",
+    "topics",
+    "audit_log",
+    "sessions",
+    "worker_heartbeats",
+    "kv_state",
+)
+
+
+async def reset_content() -> dict[str, int]:
+    """Delete all fetched/generated content. Stop the API and worker first."""
+    from sqlalchemy import text
+
+    from app.core.db import get_engine
+
+    deleted: dict[str, int] = {}
+    async with session_factory()() as db:
+        for table in CONTENT_TABLES:
+            count = (await db.execute(text(f'SELECT count(*) FROM "{table}"'))).scalar_one()
+            await db.execute(text(f'DELETE FROM "{table}"'))
+            deleted[table] = int(count)
+        await db.commit()
+
+    engine = get_engine()
+    if engine.dialect.name == "sqlite":
+        async with engine.connect() as conn:
+            await conn.execution_options(isolation_level="AUTOCOMMIT")
+            await conn.execute(text("VACUUM"))
+    return deleted
+
+
 async def create_user(tenant: Tenant, email: str, password: str, *, name: str | None = None, role: str = "owner", update: bool = True) -> str:
     if len(password) < 10:
         raise SystemExit("Password must be at least 10 characters")
@@ -197,6 +245,8 @@ def main(argv: list[str] | None = None) -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("bootstrap")
     sub.add_parser("seed-sources")
+    rc = sub.add_parser("reset-content")
+    rc.add_argument("--yes", action="store_true", help="required: confirm the destructive reset")
     sub.add_parser("drain")
     sub.add_parser("migrate")
     ca = sub.add_parser("create-admin")
@@ -215,6 +265,12 @@ def main(argv: list[str] | None = None) -> None:
                 await bootstrap()
             elif args.cmd == "seed-sources":
                 print(f"sources added: {await seed_sources(await ensure_tenant())}")
+            elif args.cmd == "reset-content":
+                if not args.yes:
+                    raise SystemExit("refusing to delete content without --yes (stop the API and worker first)")
+                deleted = await reset_content()
+                print(json.dumps({k: v for k, v in deleted.items() if v}, indent=2))
+                print("content cleared; tenant, users, sources and eval cases kept")
             elif args.cmd == "create-admin":
                 tenant = await ensure_tenant()
                 print(f"{args.email}: {await create_user(tenant, args.email, args.password, name=args.name, role=args.role)}")

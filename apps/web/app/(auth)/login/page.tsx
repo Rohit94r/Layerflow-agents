@@ -2,9 +2,9 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { Button, Field, Input } from "@/components/ui";
-import { ApiError, errorMessage, post } from "@/lib/api";
+import { ApiError, api, errorMessage, post } from "@/lib/api";
 import type { Me } from "@/lib/types";
 
 function LoginForm() {
@@ -55,6 +55,22 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
+  const qc = useQueryClient();
+
+  // If auth is already available (a real session or DISABLE_AUTH=true on the API), skip the
+  // login screen and go straight to the dashboard.
+  useEffect(() => {
+    api<Me>("/auth/me", { redirectOn401: false })
+      .then((me) => {
+        qc.setQueryData(["me"], me);
+        router.replace("/");
+      })
+      .catch(() => {
+        /* not signed in: show the form */
+      });
+  }, [qc, router]);
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">

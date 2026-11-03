@@ -46,7 +46,7 @@ async def next_slot(category: str = "brief", principal: Principal = Depends(curr
 @router.post("", status_code=201)
 async def schedule(body: PublicationIn, principal: Principal = Depends(require(ROLE_PUBLISH)), db: AsyncSession = Depends(get_db)):
     article = await owned(db, Article, body.article_id, principal.tenant_id, "article")
-    if article.state not in ("approved", "published"):
+    if article.state not in ("approved", "scheduled", "published"):
         raise conflict("not_approved", f"Only approved articles can be scheduled (state: {article.state})")
     tenant = await db.get(Tenant, principal.tenant_id)
     target = _target(tenant, body.target)

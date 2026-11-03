@@ -5,6 +5,7 @@ inside the repair loop, so an invented statistic is rejected while the model can
 from __future__ import annotations
 
 import json
+import math
 import uuid
 from typing import Any
 
@@ -37,6 +38,16 @@ class OutlineOut(BaseModel):
     sections: list[OutlineSection] = Field(min_length=3, max_length=10)
 
 
+class SectionParagraphOut(BaseModel):
+    paragraph: str = Field(min_length=20, max_length=3000)
+    facts_used: list[int] = Field(default_factory=list)
+
+    @field_validator("paragraph")
+    @classmethod
+    def _strip(cls, v: str) -> str:
+        return v.strip()
+
+
 class SectionOut(BaseModel):
     paragraphs: list[str] = Field(min_length=1, max_length=8)
     bullets: list[str] = Field(default_factory=list, max_length=8)
@@ -45,8 +56,8 @@ class SectionOut(BaseModel):
 
     @field_validator("paragraphs", "bullets")
     @classmethod
-    def _strip(cls, v: list[str]) -> list[str]:
-        return [p.strip() for p in v if p and p.strip()]
+    def _strip_items(cls, values: list[str]) -> list[str]:
+        return [value.strip() for value in values if value and value.strip()]
 
 
 class TakeawayOut(BaseModel):
@@ -190,52 +201,110 @@ async def compose(
             sections.append(prev_sections[key])
             continue
 
-        def validate_section(s: SectionOut, words: int = words, spec_key: str = key) -> list[str]:
-            problems = []
-            wc = word_count(" ".join(s.paragraphs + s.bullets))
-            if wc < words * 0.5:
-                problems.append(f"section is {wc} words; write about {words}")
-            if wc > words * 2.2:
-                problems.append(f"section is {wc} words; cut to about {words}")
-            bad = numbers_in(" ".join(s.paragraphs + s.bullets + ([s.pull_quote] if s.pull_quote else []))) - allowed_numbers
-            if bad:
-                problems.append(
-                    f"numbers {', '.join(sorted(bad))} are not in the research pack — remove them or use only pack numbers"
-                )
-            if spec_key == "lede" and word_count(" ".join(s.paragraphs)) > 60:
-                problems.append("the lede must be one paragraph of at most 40 words")
-            return problems
-
         prev_text = ""
         if key in prev_sections:
             prev_text = "\n\nPREVIOUS VERSION OF THIS SECTION (improve it, keep what works):\n" + "\n".join(prev_sections[key].get("paragraphs") or [])
-        section_prompt = (
-            f"Article: “{outline.title}” — {outline.dek}\n"
-            f"Category: {pb.label}. Write section {i}/{len(pb.sections)}: key '{key}', heading “{osec.heading}”.\n"
-            f"This section's point: {osec.point}\nTarget length: about {words} words"
-            + (" (a single lede paragraph of at most 40 words, no heading)" if key == "lede" else "")
-            + f".\nUse primarily facts {osec.facts or 'relevant to the point'}; list the fact ids you used in facts_used.\n"
-            + ("Sections already written:\n" + "\n".join(written_summaries) + "\n" if written_summaries else "")
-            + f"\n{facts}{prev_text}{revise_note}\n\n"
-            "Rules: 2–4 sentences per paragraph; bullets only for 3+ parallel items; no numbers, names or quotes that are "
-            "not in the facts above; no throat-clearing; do not repeat earlier sections."
-        )
-        out, _ = await structured(
-            ctx, agent="writer", task="section", system=system, prompt=section_prompt, schema=SectionOut, validate=validate_section,
-            context={"pack": pack, "key": key, "heading": osec.heading, "words": words, "facts": osec.facts, "category": category, "instruction": instruction},
-            prompt_version=versions_tag(used),
-        )
+        if ctx.provider.name == "mock":
+            def validate_section(out: SectionOut, target: int = words) -> list[str]:
+                wc = word_count(" ".join(out.paragraphs + out.bullets))
+                problems = []
+                if wc < target * 0.5:
+                    problems.append(f"section is {wc} words; write about {target}")
+                if wc > target * 2.2:
+                    problems.append(f"section is {wc} words; cut to about {target}")
+                bad = numbers_in(" ".join(out.paragraphs + out.bullets + ([out.pull_quote] if out.pull_quote else []))) - allowed_numbers
+                if bad:
+                    problems.append(f"numbers {', '.join(sorted(bad))} are not in the research pack")
+                return problems
+
+            section_prompt = (
+                f"Article: “{outline.title}” — {outline.dek}\n"
+                f"Category: {pb.label}. Write section {i}/{len(pb.sections)}: key '{key}', heading “{osec.heading}”.\n"
+                f"This section's point: {osec.point}\nTarget length: about {words} words.\n"
+                f"Use primarily facts {osec.facts or 'relevant to the point'}; list the fact ids you used in facts_used.\n"
+                + ("Sections already written:\n" + "\n".join(written_summaries) + "\n" if written_summaries else "")
+                + f"\n{facts}{prev_text}{revise_note}"
+            )
+            out, _ = await structured(
+                ctx, agent="writer", task="section", system=system, prompt=section_prompt, schema=SectionOut,
+                validate=validate_section,
+                context={"pack": pack, "key": key, "heading": osec.heading, "words": words, "facts": osec.facts, "category": category, "instruction": instruction},
+                prompt_version=versions_tag(used),
+            )
+            paragraphs = out.paragraphs[:1] if key == "lede" else out.paragraphs
+            facts_used = out.facts_used
+            bullets = out.bullets
+            pull_quote = out.pull_quote
+        else:
+            paragraph_count = 1 if key == "lede" else min(8, max(3, math.ceil(words / 50)))
+            paragraph_target = max(1, math.ceil(words / paragraph_count))
+            paragraphs = []
+            facts_used = []
+            for paragraph_index in range(paragraph_count):
+                def validate_paragraph(
+                    out: SectionParagraphOut, target: int = paragraph_target, spec_key: str = key
+                ) -> list[str]:
+                    problems = []
+                    wc = word_count(out.paragraph)
+                    if wc < target * 0.5:
+                        problems.append(f"paragraph is {wc} words; write about {target}")
+                    if wc > target * 2.2:
+                        problems.append(f"paragraph is {wc} words; cut to about {target}")
+                    bad = numbers_in(out.paragraph) - allowed_numbers
+                    if bad:
+                        problems.append(
+                            f"numbers {', '.join(sorted(bad))} are not in the research pack — remove them or use only pack numbers"
+                        )
+                    if spec_key == "lede" and wc > 60:
+                        problems.append("the lede must be one paragraph of at most 60 words")
+                    return problems
+
+                paragraph_prompt = (
+                    f"Article: “{outline.title}” — {outline.dek}\n"
+                    f"Category: {pb.label}. Write paragraph {paragraph_index + 1}/{paragraph_count} of section "
+                    f"{i}/{len(pb.sections)}: key '{key}', heading “{osec.heading}”.\n"
+                    f"Section point: {osec.point}\nWrite one complete paragraph of about {paragraph_target} words"
+                    + ("; this is the lede, so keep it to 25–40 words" if key == "lede" else "")
+                    + ". Return complete prose, not a short summary.\n"
+                    + f"Use primarily facts {osec.facts or 'relevant to the point'}; list the fact ids you used in facts_used.\n"
+                    + ("Sections already written:\n" + "\n".join(written_summaries) + "\n" if written_summaries else "")
+                    + ("Earlier paragraphs in this section:\n" + "\n".join(paragraphs) + "\n" if paragraphs else "")
+                    + f"\n{facts}{prev_text}{revise_note}\n\n"
+                    "Use only facts, numbers, names and quotes in the research pack. Do not wrap prose in brackets. "
+                    "No throat-clearing; do not repeat earlier sections or paragraphs."
+                )
+                out, _ = await structured(
+                    ctx, agent="writer", task="section", system=system, prompt=paragraph_prompt, schema=SectionParagraphOut,
+                    validate=validate_paragraph,
+                    context={
+                        "pack": pack,
+                        "key": key,
+                        "heading": osec.heading,
+                        "words": paragraph_target,
+                        "facts": osec.facts,
+                        "category": category,
+                        "instruction": instruction,
+                        "single_paragraph": True,
+                    },
+                    prompt_version=versions_tag(used),
+                    overrides={"max_tokens": 500},
+                )
+                paragraphs.append(out.paragraph)
+                facts_used.extend(f for f in out.facts_used if f not in facts_used)
+            bullets = []
+            pull_quote = None
+
         sections.append(
             {
                 "key": key,
                 "heading": osec.heading if spec.show_heading else spec.heading,
-                "paragraphs": out.paragraphs if key != "lede" else out.paragraphs[:1],
-                "bullets": out.bullets,
-                "pull_quote": out.pull_quote,
-                "facts_used": [f for f in out.facts_used if isinstance(f, int)],
+                "paragraphs": paragraphs,
+                "bullets": bullets,
+                "pull_quote": pull_quote,
+                "facts_used": facts_used,
             }
         )
-        written_summaries.append(f"- {osec.heading}: {truncate_words(out.paragraphs[0], 160)}")
+        written_summaries.append(f"- {osec.heading}: {truncate_words(' '.join(paragraphs), 160)}")
         await ctx.log(f"Wrote section {i}/{len(pb.sections)}: {osec.heading}")
 
     # 3) Takeaway

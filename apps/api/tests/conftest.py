@@ -19,6 +19,7 @@ os.environ.update(
         "ARTIFACTS_DIR": str(_TMP / "artifacts"),
         "FETCH_CACHE_DIR": str(_TMP / "cache"),
         "APP_BASE_URL": "http://testserver",
+        "DISABLE_AUTH": "false",
         "TEN_SITE_URL": "https://theexecutivenarrative.com",
         "RATE_LIMIT_MUTATIONS_PER_MIN": "1000",
         "RATE_LIMIT_READS_PER_MIN": "5000",

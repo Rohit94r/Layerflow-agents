@@ -46,7 +46,7 @@ def default_settings() -> dict[str, Any]:
             "agents": {
                 "discovery": {"model": s.model_fast, "temperature": 0.1, "max_tokens": 400},
                 "research": {"model": s.model_writer, "temperature": 0.2, "max_tokens": 1800},
-                "writer": {"model": s.model_writer, "temperature": 0.5, "max_tokens": 1400},
+                "writer": {"model": s.model_writer, "temperature": 0.1, "max_tokens": 1400},
                 "editor": {"model": s.model_writer, "temperature": 0.3, "max_tokens": 1400},
                 "seo": {"model": s.model_writer, "temperature": 0.3, "max_tokens": 600},
                 "critic": {"model": s.model_writer, "temperature": 0.1, "max_tokens": 1200},

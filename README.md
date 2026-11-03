@@ -44,8 +44,8 @@ uvicorn app.main:app --reload --port 8000                          # API
 python -m app.worker                                               # agents (separate terminal)
 pytest                                                             # tests (mock model, mocked internet)
 
-# frontend (Node 22+)
-cd apps/web && npm install && npm run dev                          # http://localhost:3000 (proxies /api to :8000)
+# frontend (Node 22+, pnpm) — run from repo root, or from apps/web
+pnpm install && pnpm run dev                                       # http://localhost:3000 (proxies /api to :8000)
 ```
 
 ## Architecture

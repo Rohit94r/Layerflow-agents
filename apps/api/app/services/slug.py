@@ -33,11 +33,8 @@ def _is_date_token(tok: str) -> bool:
 
 def slugify(text: str, *, max_len: int = MAX_LEN, max_words: int = MAX_WORDS) -> str:
     toks = [t for t in _tokens(text) if not _is_date_token(t)]
-    while toks and toks[0] in SLUG_STOPWORDS:
-        toks.pop(0)
-    # Prefer content words when the title is long: drop interior stopwords first.
-    if len(toks) > max_words:
-        toks = [t for i, t in enumerate(toks) if i == 0 or t not in SLUG_STOPWORDS]
+    # Keep only content words: stopwords add no meaning to a URL.
+    toks = [t for t in toks if t not in SLUG_STOPWORDS]
     toks = toks[:max_words]
     out: list[str] = []
     for tok in toks:

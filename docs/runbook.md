@@ -124,8 +124,8 @@ python -m app.worker                           # terminal 2
 
 ```bash
 cd apps/web
-npm install
-npm run dev       # http://localhost:3000 — Next rewrites /api/* to http://localhost:8000
+pnpm install
+pnpm run dev      # http://localhost:3000 — Next rewrites /api/* to http://localhost:8000
 ```
 
 **Working without a model.** Set `MODEL_PROVIDER=mock` to use the deterministic mock provider. Every run is then labelled **Mock provider** in the top bar and on generated content, so mock output can never be mistaken for real model output. Use it for UI work and tests only; never for a demo or for content that will be reviewed.

@@ -4,11 +4,11 @@ Editorial dashboard for The Executive Narrative: Next.js (App Router) + TypeScri
 It talks only to the FastAPI backend at `/api/v1` (same origin), using the HTTP-only session cookie and a double-submit CSRF header.
 
 ```bash
-npm install
-npm run dev          # http://localhost:3000, proxies /api and /site to API_INTERNAL_URL (default http://localhost:8000)
-npm run typecheck
-npm run build        # standalone output for the Docker image
-npm run test:e2e     # Playwright demo script against a running stack (MODEL_PROVIDER=mock recommended)
+pnpm install
+pnpm run dev          # http://localhost:3000, proxies /api and /site to API_INTERNAL_URL (default http://localhost:8000)
+pnpm run typecheck
+pnpm run build        # standalone output for the Docker image
+pnpm run test:e2e     # Playwright demo script against a running stack (MODEL_PROVIDER=mock recommended)
 ```
 
 | Route | Screen |
